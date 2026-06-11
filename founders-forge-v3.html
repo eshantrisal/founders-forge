@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Founder's Forge — Comic Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1117; --paper:#f4ecd8; --ink:#1c1c1c; --panel:#161d27; --border:#2c3a4d;
+    --text:#e9eef4; --muted:#8b99a9; --accent:#f0a132; --green:#3ecf8e;
+    --red:#ef5e5e; --blue:#5aa6f0; --purple:#a98df0; --teal:#46c8c8; --amber:#e8c547;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Patrick Hand',cursive;background:
+    radial-gradient(circle at 20% 10%, #131b28 0%, #0d1117 60%);
+    color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:18px}
+  .app{width:100%;max-width:760px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  h1{font-family:'Bangers',cursive;font-size:30px;letter-spacing:2px;text-shadow:3px 3px 0 #000}
+  h1 span{color:var(--accent)}
+  .pill{background:var(--panel);border:2px solid var(--border);padding:4px 14px;border-radius:18px;font-size:13px;color:var(--muted)}
+  .sndbtn{background:var(--panel);border:2px solid var(--border);border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:17px;color:var(--text)}
+
+  /* KPI + board */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}
+  .kpi{background:var(--panel);border:2px solid var(--border);border-radius:10px;padding:8px 12px}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  .kpi .val{font-size:18px}
+  .bar{height:5px;background:#0a0e13;border-radius:3px;margin-top:5px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
+  .delta{font-size:12px;margin-left:5px}
+  .up{color:var(--green)} .down{color:var(--red)}
+  .sqdcm{background:var(--panel);border:2px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+  .board-title{font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:7px;display:flex;justify-content:space-between;text-transform:uppercase}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .tile{border-radius:9px;padding:8px 4px;text-align:center;border:2px solid var(--border);background:#1f2937;transition:all .4s}
+  .tile .letter{font-family:'Bangers',cursive;font-size:24px;line-height:1}
+  .tile .tname{font-size:10px;color:var(--muted)}
+  .tile .tval{font-size:14px;margin-top:2px}
+  .tile.green{border-color:#2a5a4a;background:#13261f}.tile.green .letter{color:var(--green)}
+  .tile.amber{border-color:#5a512a;background:#262213}.tile.amber .letter{color:var(--amber)}
+  .tile.red{border-color:#5a2a2a;background:#261313}.tile.red .letter{color:var(--red)}
+  .tile.locked{opacity:.3}
+  .flash{animation:pulse .8s}
+  @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+  /* COMIC PANEL */
+  .panel{background:var(--paper);color:var(--ink);border:4px solid #000;border-radius:6px;margin-bottom:18px;
+    box-shadow:8px 8px 0 rgba(0,0,0,.55);overflow:hidden;animation:panelIn .5s cubic-bezier(.2,1.4,.4,1);position:relative}
+  .panel.tilt1{transform:rotate(-.5deg)} .panel.tilt2{transform:rotate(.5deg)}
+  @keyframes panelIn{from{opacity:0;transform:scale(.92) rotate(-1.5deg)}to{opacity:1}}
+  .art{width:100%;display:block;background:#efe5cd;border-bottom:3px solid #000}
+  .panel .inner{padding:18px 22px 22px}
+  .caption{background:#ffe9a8;border:2px solid #000;padding:7px 12px;font-size:16px;line-height:1.45;
+    box-shadow:3px 3px 0 rgba(0,0,0,.3);margin:-34px 14px 14px;position:relative;transform:rotate(-.6deg)}
+  .caption.mid{margin-top:0}
+  /* speech bubbles */
+  .bubble{background:#fff;border:2.5px solid #000;border-radius:16px;padding:9px 14px;font-size:16px;line-height:1.4;
+    max-width:82%;margin:10px 0;position:relative;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+  .bubble::after{content:"";position:absolute;bottom:-12px;left:26px;border:7px solid transparent;border-top-color:#000}
+  .bubble::before{content:"";position:absolute;bottom:-8px;left:28px;border:5px solid transparent;border-top-color:#fff;z-index:1}
+  .bubble.r{margin-left:auto}
+  .bubble.r::after{left:auto;right:26px}.bubble.r::before{left:auto;right:28px}
+  .bubble .who{font-family:'Bangers',cursive;font-size:12px;letter-spacing:1px;color:#b3530a;display:block}
+  .bubble.shout{border-width:3.5px;background:#fff3f0;transform:rotate(-1deg)}
+  .thought{border-style:dashed;border-radius:24px;background:#f2f7ff}
+  /* choices */
+  .choices{display:grid;gap:9px;margin-top:14px}
+  .choice{font-family:'Patrick Hand',cursive;background:#fff;border:3px solid #000;border-radius:8px;padding:11px 14px;cursor:pointer;
+    text-align:left;font-size:16px;line-height:1.35;box-shadow:4px 4px 0 rgba(0,0,0,.4);transition:transform .12s,box-shadow .12s;color:var(--ink)}
+  .choice:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,.45);background:#fff8e0}
+  .choice b{font-family:'Bangers',cursive;letter-spacing:1px;font-weight:400;color:#b3530a;margin-right:6px}
+  .btn{font-family:'Bangers',cursive;background:var(--accent);color:#1a1205;border:3px solid #000;border-radius:8px;
+    padding:10px 30px;font-size:19px;letter-spacing:1px;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.4);transition:transform .12s}
+  .btn:hover{transform:translate(-2px,-2px)}
+  .btn:disabled{opacity:.4;cursor:default}
+  /* effects + fact */
+  .effects{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;font-size:15px}
+  .effects span{background:#fff;border:2px solid #000;border-radius:14px;padding:2px 11px;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+  .effects .up{color:#0a7d4d}.effects .down{color:#c22}
+  .fact{background:#e8f1ff;border:2px solid #000;border-left:8px solid var(--blue);padding:9px 13px;margin:12px 0;font-size:14.5px;line-height:1.5;transform:rotate(.4deg);box-shadow:3px 3px 0 rgba(0,0,0,.25)}
+  .fact b{font-family:'Bangers',cursive;letter-spacing:1px;color:#1c4f9c;display:block;font-size:13px}
+  /* BAM overlay */
+  .bam{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) rotate(-8deg) scale(0);
+    font-family:'Bangers',cursive;font-size:84px;color:var(--accent);-webkit-text-stroke:3px #000;
+    text-shadow:6px 6px 0 #000;z-index:99;pointer-events:none;animation:bam .9s forwards}
+  .bam.badbam{color:var(--red)}
+  @keyframes bam{0%{transform:translate(-50%,-50%) rotate(-8deg) scale(0)}45%{transform:translate(-50%,-50%) rotate(-4deg) scale(1.25)}65%{transform:translate(-50%,-50%) rotate(-6deg) scale(1)}100%{transform:translate(-50%,-50%) rotate(-6deg) scale(1);opacity:0}}
+  .shake{animation:shake .5s}
+  @keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-5px,2px)}80%{transform:translate(4px,-2px)}}
+  /* chapter splash */
+  .splash{text-align:center;background:
+    repeating-linear-gradient(45deg,#f4ecd8,#f4ecd8 14px,#efe5cd 14px,#efe5cd 28px)}
+  .splash .chnum{font-family:'Bangers',cursive;font-size:15px;letter-spacing:5px;color:#b3530a;margin-top:16px}
+  .splash .chname{font-family:'Bangers',cursive;font-size:52px;letter-spacing:3px;color:var(--ink);
+    -webkit-text-stroke:1px #000;text-shadow:4px 4px 0 var(--accent);animation:zoomIn .7s cubic-bezier(.2,1.6,.4,1)}
+  .splash .year{font-size:14px;letter-spacing:3px;color:#666;margin-bottom:8px}
+  .splash .hook{font-size:18px;font-style:italic;color:#7a3b00;max-width:520px;margin:6px auto 14px;line-height:1.45}
+  @keyframes zoomIn{from{transform:scale(.3) rotate(-5deg);opacity:0}to{transform:scale(1)}}
+  .unlock{background:#dff5e8;border:2px solid #000;border-left:8px solid var(--green);padding:9px 13px;margin:0 18px 16px;font-size:14.5px;line-height:1.5;text-align:left;box-shadow:3px 3px 0 rgba(0,0,0,.25)}
+  /* event card */
+  .event-flag{font-family:'Bangers',cursive;display:inline-block;background:var(--red);color:#fff;border:3px solid #000;
+    padding:4px 16px;font-size:18px;letter-spacing:2px;transform:rotate(-2deg);box-shadow:3px 3px 0 #000;margin-bottom:10px}
+  /* onboarding */
+  .ob label{font-family:'Bangers',cursive;display:block;font-size:14px;letter-spacing:1px;color:#7a3b00;margin:14px 0 6px}
+  .ob input[type=text]{width:100%;background:#fff;border:3px solid #000;border-radius:8px;padding:10px 13px;font-size:17px;font-family:'Patrick Hand',cursive;outline:none;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .optrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+  .opt{font-family:'Patrick Hand',cursive;background:#fff;border:2.5px solid #000;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:14.5px;text-align:center;line-height:1.3;box-shadow:2px 2px 0 rgba(0,0,0,.3);color:var(--ink)}
+  .opt.sel{background:var(--accent);transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+  .diff-badge{font-family:'Bangers',cursive;display:inline-block;border:3px solid #000;border-radius:8px;padding:6px 22px;font-size:22px;letter-spacing:2px;margin:10px 0;box-shadow:4px 4px 0 rgba(0,0,0,.4);transform:rotate(-1deg)}
+  .diff-badge.easy{background:#bdf0d4;color:#0a5d38}.diff-badge.normal{background:#ffe9a8;color:#7a5a00}.diff-badge.hard{background:#ffc9c2;color:#8c1d10}
+  /* report */
+  .rowm{display:grid;grid-template-columns:110px 1fr 78px;gap:10px;align-items:center;font-size:14px;padding:7px 0;border-bottom:2px dotted #999}
+  .mname{font-family:'Bangers',cursive;font-size:12px;letter-spacing:1px;color:#7a3b00}
+  .dual{position:relative;height:10px;background:#ddd;border:1.5px solid #000;border-radius:5px;overflow:hidden}
+  .dual .was{position:absolute;height:100%;background:#a9a294}
+  .dual .now{position:absolute;height:100%;transition:width .8s ease}
+  .verdict{font-style:italic;color:#7a3b00;margin:14px 0;line-height:1.5;font-size:16px}
+  .timeline .row{display:flex;gap:12px;font-size:14px;padding:6px 0;border-bottom:2px dotted #999}
+  .timeline .ch{font-family:'Bangers',cursive;color:#b3530a;min-width:80px;font-size:12px;letter-spacing:1px;padding-top:3px}
+  /* svg animations */
+  .rainfall{animation:rainfall 1s linear infinite}
+  @keyframes rainfall{from{transform:translateY(-10px)}to{transform:translateY(14px)}}
+  .spin{transform-origin:center;transform-box:fill-box;animation:spin 3s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .smoke{animation:smoke 3s ease-in-out infinite}
+  @keyframes smoke{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.8;transform:translateY(-5px)}}
+  .bob{animation:bob 3.4s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-5px) rotate(.8deg)}}
+  .pulse2{transform-origin:center;transform-box:fill-box;animation:pulse2 1.8s ease-in-out infinite}
+  @keyframes pulse2{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+  .blink{animation:blink 1.4s steps(2) infinite}
+  @keyframes blink{50%{opacity:.15}}
+  .drift{animation:drift 5s ease-in-out infinite}
+  @keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+  @media(max-width:560px){.tiles{gap:4px}.tile .tname{display:none}.splash .chname{font-size:38px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>FOUNDER'S <span>FORGE</span></h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="pill" id="pill">Issue #0</div>
+      <button class="sndbtn" id="sndbtn" onclick="toggleSound()">🔊</button>
+    </div>
+  </header>
+  <div class="kpis" id="kpis"></div>
+  <div id="sqdcmWrap"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+// ================= SOUND (WebAudio, no files) =================
+let AC=null, soundOn=true;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended")AC.resume(); return AC; }
+function toggleSound(){ soundOn=!soundOn; document.getElementById("sndbtn").textContent=soundOn?"🔊":"🔇"; if(soundOn)blip(660,.06,.05); }
+function tone(freq,dur,type="square",vol=.08,when=0,slide=0){
+  if(!soundOn)return; const a=ac(),o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,a.currentTime+when);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),a.currentTime+when+dur);
+  g.gain.setValueAtTime(vol,a.currentTime+when);
+  g.gain.exponentialRampToValueAtTime(.001,a.currentTime+when+dur);
+  o.connect(g);g.connect(a.destination);o.start(a.currentTime+when);o.stop(a.currentTime+when+dur+.05);
+}
+function noise(dur,vol=.12,when=0){
+  if(!soundOn)return; const a=ac(),len=a.sampleRate*dur,buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const s=a.createBufferSource(),g=a.createGain();s.buffer=buf;
+  g.gain.setValueAtTime(vol,a.currentTime+when);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+when+dur);
+  s.connect(g);g.connect(a.destination);s.start(a.currentTime+when);
+}
+const blip=(f,d,v)=>tone(f,d,"square",v);
+const SFX={
+  click:()=>blip(520,.05,.05),
+  choose:()=>{noise(.12,.1);tone(180,.12,"square",.09)},
+  good:()=>{tone(523,.09,"square",.07);tone(659,.09,"square",.07,.08);tone(784,.18,"square",.08,.16)},
+  bad:()=>{tone(220,.2,"sawtooth",.09,0,-120);tone(110,.35,"sawtooth",.08,.1,-40);noise(.25,.07,.05)},
+  chapter:()=>{tone(98,.7,"sawtooth",.1,0,-30);tone(196,.5,"square",.06,.1);noise(.4,.12,.05);tone(392,.3,"triangle",.07,.35)},
+  unlock:()=>{tone(880,.1,"triangle",.08);tone(1175,.12,"triangle",.08,.1);tone(1568,.22,"triangle",.09,.22)},
+  event:()=>{tone(440,.1,"square",.1);tone(415,.1,"square",.1,.12);tone(440,.1,"square",.1,.24);noise(.2,.1,.36)},
+  gameover:()=>{tone(392,.4,"sawtooth",.1,0,-100);tone(311,.4,"sawtooth",.1,.35,-80);tone(233,.9,"sawtooth",.12,.7,-60)}
+};
+
+// ================= ART (animated sketches) =================
+const S='stroke="#33414f" stroke-width="2.5" fill="none" stroke-linecap="round"';
+const SA='stroke="#c46a10" stroke-width="2.5" fill="none" stroke-linecap="round"';
+const SD='stroke="#7d8a96" stroke-width="1.8" fill="none" stroke-linecap="round"';
+function svg(inner){return `<svg class="art" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;}
+const ART={
+rain_drive:svg(`
+  <rect x="60" y="40" width="34" height="62" ${SD}/><rect x="100" y="25" width="40" height="77" ${SD}/><rect x="146" y="50" width="30" height="52" ${SD}/>
+  <g class="bob"><path d="M250 105 q5 -18 28 -18 q8 -12 30 -12 q22 0 28 12 q22 2 24 18 z" ${S}/>
+  <circle cx="270" cy="107" r="7" ${S}/><circle cx="330" cy="107" r="7" ${S}/></g>
+  <g class="rainfall"><path d="M70 15 l-6 14 M110 8 l-6 14 M160 20 l-6 14 M210 10 l-6 14 M250 22 l-6 14 M310 12 l-6 14 M350 25 l-6 14 M30 30 l-6 14" ${SD}/></g>
+  <path d="M30 112 h350" ${SD}/>
+`),
+workshop_gate:svg(`
+  <path d="M50 120 L50 50 L200 25 L350 50 L350 120" ${S}/>
+  <path d="M90 120 L90 65 L310 65 L310 120" ${S}/>
+  <path d="M90 75 h220 M90 87 h220 M90 99 h220 M90 111 h220" ${SD}/>
+  <g class="bob"><rect x="240" y="35" width="70" height="22" ${SA}/>
+  <text x="248" y="51" fill="#c46a10" font-size="11" font-family="monospace">FOR SALE</text></g>
+  <g class="smoke"><path d="M140 40 q4 -8 10 -2 q6 6 -2 9" ${SD}/></g>
+  <path d="M30 120 h340" ${SD}/>
+`),
+old_lathe:svg(`
+  <rect x="80" y="70" width="240" height="35" rx="4" ${S}/>
+  <rect x="100" y="50" width="45" height="22" ${S}/>
+  <g class="spin"><circle cx="160" cy="61" r="11" ${S}/><path d="M160 50 v6 M160 66 v6 M149 61 h6 M165 61 h6" ${SA}/></g>
+  <path d="M171 61 h60" ${SA}/>
+  <rect x="231" y="52" width="26" height="18" ${S}/>
+  <path d="M95 105 v18 M305 105 v18" ${S}/>
+  <g class="smoke"><path d="M120 38 q3 -10 -2 -16 M132 40 q5 -8 1 -18" ${SD}/></g>
+  <path d="M40 123 h320" ${SD}/>
+`),
+moonlight:svg(`
+  <circle cx="330" cy="35" r="16" ${SD}/>
+  <rect x="70" y="75" width="150" height="8" ${S}/>
+  <path d="M85 83 v35 M205 83 v35" ${S}/>
+  <g class="blink"><path d="M110 75 v-20 q0 -10 12 -10 q12 0 12 10" ${SA}/><path d="M122 58 l14 16 h-28 z" ${SA}/></g>
+  <circle cx="260" cy="60" r="14" ${S}/><g class="spin" style="animation-duration:8s"><path d="M260 52 v8 l6 4" ${S}/></g>
+  <path d="M40 120 h320" ${SD}/>
+`),
+first_order:svg(`
+  <rect x="90" y="30" width="130" height="90" ${S}/>
+  <circle cx="155" cy="62" r="20" ${SD}/><path d="M155 42 v40 M135 62 h40" ${SD}/>
+  <path d="M100 95 h45 m-45 10 h60" ${SD}/>
+  <g class="bob"><path d="M250 90 q20 -25 55 -12" ${SA}/><path d="M250 95 h60 l-6 18 h-48 z" ${S}/></g>
+  <text x="240" y="50" fill="#33414f" font-size="11" font-family="monospace">±0.02mm</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+inspection:svg(`
+  <g class="pulse2"><path d="M120 70 a30 30 0 1 1 18 28" ${S}/><circle cx="150" cy="70" r="6" ${SA}/></g>
+  <path d="M138 98 l30 24" ${S}/>
+  <rect x="230" y="55" width="80" height="26" rx="13" ${S}/>
+  <g class="blink"><path d="M230 100 l8 8 14 -16 M270 100 l8 8 14 -16" ${SA}/></g>
+  <path d="M40 123 h320" ${SD}/>
+`),
+visitor:svg(`
+  <circle cx="140" cy="45" r="12" ${S}/><path d="M140 57 v35 M140 65 l-18 14 M140 65 l18 14 M140 92 l-12 26 M140 92 l12 26" ${S}/>
+  <circle cx="240" cy="45" r="12" ${S}/><path d="M228 38 q12 -10 24 0" ${SA}/>
+  <path d="M240 57 v35 M240 65 l-18 14 M240 65 l20 10 M240 92 l-12 26 M240 92 l12 26" ${S}/>
+  <g class="bob"><rect x="258" y="70" width="22" height="16" ${SD}/></g>
+  <path d="M158 79 h64" ${SD} stroke-dasharray="4 4"/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+hiring:svg(`
+  <circle cx="110" cy="50" r="11" ${S}/><path d="M110 61 v30 M110 68 l-14 12 M110 68 l14 12 M110 91 l-10 24 M110 91 l10 24" ${S}/>
+  <g class="bob"><circle cx="200" cy="50" r="11" ${SA}/><path d="M200 61 v30 M200 68 l-14 12 M200 68 l14 12 M200 91 l-10 24 M200 91 l10 24" ${SA}/></g>
+  <circle cx="290" cy="50" r="11" ${S}/><path d="M290 61 v30 M290 68 l-14 12 M290 68 l14 12 M290 91 l-10 24 M290 91 l10 24" ${S}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+rush:svg(`
+  <g class="pulse2"><circle cx="90" cy="55" r="22" ${S}/><path d="M90 40 v15 l10 7" ${SA}/></g>
+  <rect x="170" y="70" width="28" height="22" ${S}/><rect x="202" y="70" width="28" height="22" ${S}/><rect x="186" y="46" width="28" height="22" ${S}/>
+  <g class="drift"><path d="M270 92 h60 v-22 h-38 l-10 -14 h-12 z" ${S}/>
+  <circle cx="284" cy="96" r="7" ${S}/><circle cx="318" cy="96" r="7" ${S}/></g>
+  <path d="M250 70 h12 m-18 10 h12 m-6 10 h12" ${SA}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+factory:svg(`
+  <path d="M40 118 V70 l45 -20 v20 l45 -20 v20 l45 -20 v68" ${S}/>
+  <path d="M175 118 V60 h185 v58" ${S}/>
+  <rect x="195" y="80" width="30" height="20" ${SD}/><rect x="240" y="80" width="30" height="20" ${SD}/><rect x="285" y="80" width="30" height="20" ${SD}/>
+  <rect x="320" y="40" width="14" height="20" ${S}/>
+  <g class="smoke"><path d="M324 32 q4 -8 -1 -12 M331 34 q5 -7 1 -14" ${SD}/></g>
+  <g class="blink"><path d="M55 90 h18 m-18 12 h18 M100 90 h18 m-18 12 h18" ${SD}/></g>
+  <path d="M20 120 h360" ${SD}/>
+`),
+whiteboard:svg(`
+  <rect x="110" y="28" width="180" height="80" ${S}/>
+  <path d="M150 108 l-14 22 M250 108 l14 22" ${S}/>
+  <path d="M125 92 l30 -18 25 8 30 -28 30 6" ${SA}/>
+  <text x="122" y="45" fill="#33414f" font-size="11" font-family="monospace">OEE 52%</text>
+  <g class="blink"><circle cx="330" cy="55" r="4" fill="#ef5e5e" stroke="none"/></g>
+  <circle cx="330" cy="68" r="4" fill="#e8c547" stroke="none"/><circle cx="330" cy="81" r="4" fill="#3ecf8e" stroke="none"/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+canteen:svg(`
+  <rect x="60" y="35" width="110" height="65" ${S}/>
+  <g class="blink"><path d="M178 50 L230 30 m-52 35 L230 90" ${SD} stroke-dasharray="3 4"/></g>
+  <path d="M70 55 l20 -10 15 6 20 -16 25 4" ${SA}/>
+  <circle cx="250" cy="70" r="9" ${S}/><circle cx="280" cy="74" r="9" ${S}/><circle cx="310" cy="70" r="9" ${S}/><circle cx="265" cy="95" r="9" ${S}/><circle cx="295" cy="97" r="9" ${S}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+kaizen:svg(`
+  <g class="pulse2"><circle cx="150" cy="60" r="24" ${SA}/>
+  <path d="M150 36 v-10 M150 94 v-10 M126 60 h-10 M184 60 h-10 M133 43 l-7 -7 M174 77 l-7 -7 M167 43 l7 -7 M133 77 l-7 7" ${SA}/></g>
+  <g class="spin" style="animation-duration:6s"><circle cx="260" cy="62" r="22" ${S}/>
+  <path d="M260 40 l5 8 h-10 z M260 84 l5 -8 h-10 z M238 62 l8 -5 v10 z M282 62 l-8 -5 v10 z" ${S}/></g>
+  <path d="M40 123 h320" ${SD}/>
+`),
+safety:svg(`
+  <path d="M150 50 q0 -22 28 -22 q28 0 28 22 l4 14 h-64 z" ${SA}/>
+  <g class="blink"><path d="M250 95 l28 -50 28 50 z" ${S}/><path d="M278 62 v16 m0 7 v3" ${S}/></g>
+  <path d="M100 95 h200" ${SD}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+automotive:svg(`
+  <g class="bob"><path d="M90 95 q8 -24 40 -26 q14 -16 44 -16 q32 0 42 16 q34 2 42 26 z" ${S}/>
+  <circle cx="135" cy="99" r="11" ${S}/><circle cx="245" cy="99" r="11" ${S}/></g>
+  <g class="spin"><circle cx="320" cy="55" r="20" ${SA}/>
+  <path d="M320 35 l4 7 h-8z M320 75 l4 -7 h-8z M300 55 l7 -4 v8z M340 55 l-7 -4 v8z" ${SA}/></g>
+  <path d="M40 118 h320" ${SD}/>
+`),
+ppap:svg(`
+  <rect x="120" y="40" width="80" height="75" ${S}/>
+  <rect x="150" y="32" width="80" height="80" ${S}/>
+  <path d="M160 50 h60 m-60 12 h60 m-60 12 h44 m-44 12 h52" ${SD}/>
+  <g class="pulse2"><circle cx="270" cy="90" r="18" ${SA}/><path d="M262 90 l6 7 11 -13" ${SA}/></g>
+  <text x="252" y="50" fill="#33414f" font-size="10" font-family="monospace">PPAP L3</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+eightd:svg(`
+  <g class="drift"><circle cx="170" cy="62" r="26" ${S}/><path d="M189 81 l28 26" ${S}/><rect x="158" y="54" width="24" height="14" rx="7" ${SA}/></g>
+  <path d="M250 50 h70 m-70 14 h54 m-54 14 h62" ${SD}/>
+  <text x="250" y="40" fill="#c0392b" font-size="11" font-family="monospace">8D REPORT</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+plant_choice:svg(`
+  <path d="M70 115 V75 l35 -16 v16 l35 -16 v52" ${S}/>
+  <path d="M230 115 V60 h110 v55" ${SA}/>
+  <g class="drift"><path d="M250 60 v-25 h8 m30 25 v-35 l30 12" ${SA}/><path d="M285 25 h40" ${SD}/></g>
+  <path d="M180 90 h30 m-8 -8 l8 8 -8 8" ${SD}/>
+  <path d="M40 120 h330" ${SD}/>
+`),
+covid:svg(`
+  <g class="pulse2"><circle cx="120" cy="60" r="22" ${S}/>
+  <path d="M120 30 v-10 M120 90 v10 M90 60 h-10 M150 60 h10 M99 39 l-7 -7 M141 81 l7 7 M141 39 l7 -7 M99 81 l-7 7" ${S}/></g>
+  <path d="M230 115 V70 l40 -18 v18 l40 -18 v63" ${SD}/>
+  <g class="bob"><rect x="290" y="40" width="55" height="30" rx="6" ${SA}/>
+  <text x="298" y="60" fill="#c46a10" font-size="12" font-family="monospace">CLOSED</text></g>
+  <path d="M40 123 h330" ${SD}/>
+`),
+ev:svg(`
+  <g class="bob"><path d="M100 95 q8 -24 40 -26 q14 -16 44 -16 q32 0 42 16 q34 2 42 26 z" ${S}/>
+  <circle cx="145" cy="99" r="11" ${S}/><circle cx="255" cy="99" r="11" ${S}/></g>
+  <g class="blink"><path d="M196 60 l-10 16 h12 l-10 16" ${SA}/></g>
+  <rect x="302" y="60" width="34" height="20" rx="4" ${SA}/>
+  <path d="M40 118 h320" ${SD}/>
+`),
+ai:svg(`
+  <g class="pulse2"><rect x="110" y="40" width="60" height="60" rx="8" ${SA}/>
+  <path d="M125 60 h30 M125 72 h22 M125 84 h28" ${SA}/></g>
+  <path d="M110 55 h-20 M110 75 h-20 M110 95 h-20 M170 55 h20 M170 75 h20 M170 95 h20" ${SD}/>
+  <g class="blink"><circle cx="82" cy="55" r="3" fill="#c46a10" stroke="none"/><circle cx="198" cy="75" r="3" fill="#c46a10" stroke="none"/></g>
+  <path d="M250 100 l20 -40 q5 -10 15 -5 l25 12" ${S}/><circle cx="312" cy="70" r="8" ${S}/><path d="M250 100 h40" ${S}/>
+  <path d="M40 123 h330" ${SD}/>
+`),
+audit:svg(`
+  <rect x="120" y="30" width="90" height="90" ${S}/>
+  <path d="M150 26 h30 v10 h-30 z" ${S}/>
+  <g class="blink"><path d="M132 55 l7 7 12 -14 M132 80 l7 7 12 -14" ${SA}/></g>
+  <g class="spin" style="animation-duration:10s"><circle cx="280" cy="60" r="20" ${S}/><path d="M280 46 v14 l9 6" ${S}/></g>
+  <path d="M40 123 h320" ${SD}/>
+`),
+ship:svg(`
+  <g class="bob"><path d="M80 95 h240 l-22 25 H100 z" ${S}/>
+  <rect x="110" y="75" width="32" height="20" ${SA}/><rect x="146" y="75" width="32" height="20" ${S}/><rect x="182" y="75" width="32" height="20" ${SA}/><rect x="218" y="75" width="32" height="20" ${S}/>
+  <rect x="146" y="55" width="32" height="20" ${S}/><rect x="182" y="55" width="32" height="20" ${SA}/>
+  <rect x="262" y="55" width="24" height="40" ${S}/></g>
+  <path d="M40 125 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0" ${SD}/>
+`),
+globe:svg(`
+  <g class="bob"><circle cx="200" cy="72" r="42" ${S}/>
+  <ellipse cx="200" cy="72" rx="42" ry="16" ${SD}/><ellipse cx="200" cy="72" rx="18" ry="42" ${SD}/></g>
+  <g class="blink"><path d="M120 40 Q160 5 215 28" ${SA} stroke-dasharray="5 5"/><path d="M280 110 Q250 135 205 118" ${SA} stroke-dasharray="5 5"/></g>
+  <circle cx="118" cy="42" r="3" fill="#c46a10" stroke="none"/><circle cx="282" cy="108" r="3" fill="#c46a10" stroke="none"/>
+`),
+legacy:svg(`
+  <path d="M90 115 V70 l40 -18 v18 l40 -18 v63" ${SD}/>
+  <rect x="220" y="45" width="100" height="70" ${S}/>
+  <path d="M220 45 l50 -22 50 22" ${S}/>
+  <g class="bob"><circle cx="150" cy="95" r="9" ${SA}/><path d="M150 104 v14 M150 108 l-8 8 M150 108 l8 8" ${SA}/>
+  <circle cx="172" cy="98" r="7" ${S}/><path d="M172 105 v13 M172 108 l-6 7 M172 108 l6 7" ${S}/></g>
+  <path d="M40 123 h330" ${SD}/>
+`),
+boom:svg(`
+  <g class="pulse2"><path d="M200 20 l12 30 32 -18 -10 34 36 4 -30 20 24 26 -36 -8 2 36 -30 -26 -22 28 -2 -36 -34 12 22 -30 -32 -14 36 -6 -12 -32 30 16 z" ${SA}/></g>
+  <text x="168" y="82" fill="#c0392b" font-size="22" font-family="Bangers,cursive">!!</text>
+`)
+};
+
+// ================= METRICS =================
+const FOUNDER_METRICS={
+  cash:{name:"Cash",color:"var(--accent)",fmt:v=>"₹"+v+"L"},
+  resolve:{name:"Resolve",color:"var(--purple)",fmt:v=>v},
+  reputation:{name:"Reputation",color:"var(--blue)",fmt:v=>v},
+  oee:{name:"Plant OEE",color:"var(--teal)",fmt:v=>v+"%"}
+};
+const SQDCM=[{key:"S",name:"Safety"},{key:"Q",name:"Quality"},{key:"D",name:"Delivery"},{key:"C",name:"Cost"},{key:"M",name:"Morale"}];
+
+// ================= RANDOM EVENTS (plot twists) =================
+const EVENTS=[
+  {flag:"POWER CUT!",art:"factory",cap:"MIDC grid fails. Four hours dark. The UPS saves the CNC controllers — barely.",fx:{D:-4,C:-3},snd:"bad"},
+  {flag:"SURPRISE ORDER!",art:"first_order",cap:"A customer's other supplier just failed an audit. Their panic is your windfall.",fx:{cash:+8,D:-3},snd:"good"},
+  {flag:"POACHED!",art:"hiring",cap:"A rival offers your best setter double salary. He leaves on a Tuesday. No notice.",fx:{M:-5,Q:-4},snd:"bad"},
+  {flag:"MONSOON!",art:"rain_drive",cap:"The roof holds. The road doesn't. Two dispatch trucks stuck axle-deep for a day.",fx:{D:-5},snd:"bad"},
+  {flag:"STEEL SPIKE!",art:"whiteboard",cap:"Raw material up 18% overnight. Your fixed-price contracts suddenly feel very fixed.",fx:{C:-6,cash:-5},snd:"bad"},
+  {flag:"AWARD!",art:"ppap",cap:"State 'Emerging SME' award. The certificate is plastic. The phone calls are gold.",fx:{reputation:+7,M:+4},snd:"good"},
+  {flag:"TAX REFUND!",art:"moonlight",cap:"The GST refund — pending eleven months — lands without warning. Accountants weep.",fx:{cash:+9},snd:"good"},
+  {flag:"NEAR MISS!",art:"safety",cap:"A sling slips. The coil swings. Nobody under it — this time. The toolbox talk is silent.",fx:{S:-5,M:-3},snd:"bad"}
+];
+
+// ================= STORY (comic-condensed) =================
+const CHAPTERS=[
+{ title:"Chapter 1", pill:"Issue #1 — The Leap", year:"YEAR ZERO · PUNE", art:"rain_drive",
+  head:"THE LEAP", hook:"Every great factory was once one person's unreasonable decision.",
+  text:"Seventeen years at Hexler Industries. Another reorg. Another boss half your age. On the rainy drive home: a shuttered workshop, a rusting FOR SALE sign... and a thought that won't leave.",
+  unlock:"Two numbers rule your life now: <b>CASH</b> (zero = the end) and <b>RESOLVE</b> (your fuel — burnout ends stories too). <b>REPUTATION</b> starts near nothing. Like it really does.",
+  scenes:[
+  { art:"workshop_gate",
+    cap:"The Kadam workshop costs ₹38 lakh — almost everything you have saved in seventeen years. Inside: two ancient lathes, a milling machine older than you, pigeons in the rafters, and forty years of cutting oil soaked into the floor. The first decision of your new life is also the biggest.",
+    bub:[["BROKER","Machines included. As-is. <i>Especially</i> as-is."],["YOU","(My grandfather was a toolmaker. My hands remember.)","thought"]],
+    fact:"Honda began in 1946 in a 12-square-metre wooden shack — one machine tool, and Mrs. Honda as test rider.",
+    choices:[
+      {label:"ALL IN —","sub":"buy it outright. No retreat.",out:"The keys are heavy in your palm. Workshop: yours. Income: zero. Heart: thudding.",fx:{cash:-30,resolve:+12,reputation:+2}},
+      {label:"LEASE IT —",sub:"preserve cash, pay monthly.",out:"₹60k/month, buy-option in two years. Safer — but every month now has a meter running.",fx:{cash:-8,resolve:+5}},
+      {label:"PARTNER UP —",sub:"Vikram brings half the money for 40%.",out:"The burden halves. So does the ownership. Vikram has opinions. Many opinions.",fx:{cash:-15,resolve:+3,reputation:+5}}
+    ]},
+  { art:"old_lathe",
+    cap:"Week one as an owner. The big lathe coughs to life, runs four glorious minutes, and dies with a smell of burnt insulation. As you stand there with a multimeter you barely know how to use, an old man appears at the gate — Mr. Pawar, who ran these machines for thirty years.",
+    bub:[["MR. PAWAR","I worked here thirty years. That lathe — I know her moods. ₹35,000 a month."],["YOU","(I can barely pay myself...)","thought"]],
+    fact:"A 1960s manual lathe in master hands holds 0.01mm — finer than a human hair. The hands matter more than the machine.",
+    choices:[
+      {label:"HIRE PAWAR —",sub:"experience beats ignorance.",out:"Three days later the lathe purrs. You learn more in a week than in a year of manuals.",fx:{cash:-7,resolve:+8,reputation:+4}},
+      {label:"DIY —",sub:"YouTube + stubbornness.",out:"Two weeks. Burnt fingers. It runs at 70% speed. You learned a lot — and lost time you didn't have.",fx:{cash:-3,resolve:-8}},
+      {label:"GO CNC —",sub:"lease a modern machine instead.",out:"The CNC gleams. The EMI growls. But now you hold tolerances the old lathes only dreamed of.",fx:{cash:-12,resolve:+4,reputation:+6}}
+    ]},
+  { art:"moonlight",
+    cap:"One month in. Savings bleeding, no orders yet, and your old employer calls with a tempting lifeline: contract drafting work, decent money, fully remote. It would fund the workshop — and quietly consume the very hours the workshop needs to come alive. Every founder meets this question.",
+    bub:[["EX-BOSS","Easy money. Nights and weekends. Think about it."],["YOU","(One foot on the dock... or burn the boats?)","thought"]],
+    fact:"Wharton studied 5,000+ founders: keeping a day job lowers failure odds — but capital-hungry manufacturing dreams punish divided attention.",
+    choices:[
+      {label:"BURN THE BOATS —",sub:"refuse. Full focus.",out:"Terrifying and clean. At the workshop by 7 every day. Hunger is a scheduling tool.",fx:{cash:-5,resolve:+10,reputation:+3}},
+      {label:"MOONLIGHT —",sub:"take the work, fund the dream.",out:"Money helps. But drafting at midnight, machining at dawn — your back now makes the lathe's sound.",fx:{cash:+12,resolve:-12}},
+      {label:"COUNTER —",sub:"make them your first parts customer.",out:"Your ex-boss laughs... then sends a real order. Your first invoice with YOUR name on it.",fx:{cash:+6,resolve:+8,reputation:+6}}
+    ]}
+]},
+{ title:"Chapter 2", pill:"Issue #2 — First Blood", year:"YEAR ONE · THE WORKSHOP", art:"first_order",
+  head:"FIRST BLOOD", hook:"In manufacturing, your word is a date and a dimension.",
+  text:"Word travels in industrial estates. Deshmukh Pumps needs 500 precision shaft sleeves — fast. Their man looks around your shop, unimpressed.",
+  unlock:"Two tiles light up: <b>Q — QUALITY</b> and <b>D — DELIVERY</b>. The board has a name: <b>SQDCM</b> — the five letters on the wall of every serious factory. You'll earn the rest.",
+  sqdcmUnlock:["Q","D"],
+  scenes:[
+  { art:"inspection",
+    cap:"Your first real order: 500 precision shaft sleeves for Deshmukh Pumps, whose regular supplier just botched a batch. The drawing demands ±0.02mm on the bore — your old lathe can hold it on a good day, with Pawar's hands. Three weeks. No room for a single bad week.",
+    bub:[["PURCHASE MGR","Mess it up, and everyone on this street will know."]],
+    fact:"The 1-10-100 rule: a defect costs ₹1 at the machine, ₹10 at final inspection, ₹100 at the customer.",
+    choices:[
+      {label:"BLITZ —",sub:"12-hour days, inspect at the end.",out:"Day 18: done. Inspection: 61 bad. Frantic rework. You ship day 21 — exhausted, margins shredded, on time.",fx:{cash:+8,resolve:-10,Q:-8,D:+5}},
+      {label:"CHECK AS YOU GO —",sub:"first-piece + every 20th part.",out:"Drift caught day 6 — worn insert, swapped in minutes. 500 good sleeves, day 20. Pawar nods. That's a standing ovation.",fx:{cash:+10,resolve:+5,Q:+10,D:+8}},
+      {label:"OUTSOURCE 200 —",sub:"share the load, hedge the risk.",out:"Their parts come back... variable. You re-machine 70 quietly. Your name rides on every part that leaves your gate.",fx:{cash:+4,resolve:-4,Q:-5,D:+10}}
+    ]},
+  { art:"visitor",
+    cap:"The sleeves delivered, Deshmukh's quality head visits unannounced. He picks up a part, mics it, and says nothing for a full minute — the longest minute of your year. Then comes an offer four times bigger than your capacity: 2,000 impeller hubs, every month, ongoing. This is the door.",
+    bub:[["QUALITY HEAD","Not bad. We need 2,000 impeller hubs. Monthly. Ongoing."],["QUALITY HEAD","But your shop... is not a factory.","shout"]],
+    fact:"Toyota buyers judge a supplier in ten minutes — from the floor, the toilets, and whether workers make eye contact.",
+    choices:[
+      {label:"SAY YES —",sub:"buy a used CNC on loan. Now.",out:"The loan officer becomes your most-called contact. But monthly revenue now exists — a heartbeat, not a pulse.",fx:{cash:-10,resolve:+6,reputation:+8,D:-5}},
+      {label:"RAMP UP —",sub:"500 now, 2,000 by month six.",out:"He almost smiles. 'A supplier who knows his limits. Rare.' You get the contract — and survive it.",fx:{cash:+6,resolve:+4,reputation:+10,Q:+5}},
+      {label:"STAY NICHE —",sub:"high-precision, low volume only.",out:"A niche is a fortress. Margins are lovely. But you've capped your own ceiling — and you know it.",fx:{cash:+8,resolve:-3,reputation:+4,Q:+8}}
+    ]},
+  { art:"hiring",
+    cap:"The monthly contract means you finally need to hire. Two paths sit across your desk: Sunil, a brilliant machinist who lost his last job for arguing with everyone — and two fresh ITI graduates, eager and blank as new steel. Meanwhile the shop floor is drowning in chips, offcuts and unlabelled bins, and Pawar has started muttering about discipline.",
+    bub:[["PAWAR","In Telco we cleaned the machine before going home. A dirty floor hides every problem."]],
+    fact:"5S isn't housekeeping — it's diagnosis. Toyota calls cleaning 'inspection': wiping machines daily catches 70% of failures early.",
+    choices:[
+      {label:"HIRE SUNIL —",sub:"skill now, personality later.",out:"His parts are jewellery. His arguments are war. Pawar threatens to retire. Twice.",fx:{Q:+10,D:+5,resolve:-8}},
+      {label:"TRAIN THE KIDS —",sub:"Pawar's way, on laminated cards.",out:"Slow for three months... then it clicks. Same way, every time. You've accidentally invented standard work.",fx:{cash:-5,Q:+6,D:+3,resolve:+5,reputation:+3}},
+      {label:"5S BLITZ FIRST —",sub:"one weekend, whole shop.",out:"Shadow boards up, floor painted, a hidden coolant leak found. Monday feels like a different company.",fx:{Q:+8,D:+6,resolve:+4,cash:-2}}
+    ]},
+  { art:"rush",
+    cap:"Thursday, 6 PM. The phone rings: Deshmukh's production line is at risk and they need 300 hubs by Monday morning — double your weekly rate, over a weekend. Failing your anchor customer is unthinkable. So is shipping garbage to make a count.",
+    bub:[["DESHMUKH GM","Can you do it? Yes or no?","shout"]],
+    fact:"An automotive line-stop costs ₹30–80 lakh per HOUR. Suppliers who give honest numbers under pressure become legends.",
+    choices:[
+      {label:"PROMISE IT —",sub:"all hands, all weekend, you too.",out:"Monday 5 AM: tempo loaded. The GM calls personally. Your team is wrecked — and walking tall.",fx:{D:+12,reputation:+10,resolve:-10}},
+      {label:"HONEST NUMBERS —",sub:"200 Monday, rest Tuesday.",out:"'You're the only supplier whose numbers we can plan on.' Trust compounds faster than interest.",fx:{D:+8,reputation:+8,Q:+5,resolve:-3}},
+      {label:"SKIP INSPECTION —",sub:"make the count. Quietly.",out:"Monday made. Wednesday: 9 oversize bores caught at THEIR line. Formal complaint. The shortcut becomes the longest road.",fx:{D:+5,reputation:-15,Q:-12,cash:-6}}
+    ]}
+]},
+{ title:"Chapter 3", pill:"Issue #3 — The Factory", year:"YEAR THREE · CHAKAN MIDC", art:"factory",
+  head:"THE FACTORY", hook:"You're no longer the bottleneck-fixer. You ARE the bottleneck.",
+  text:"A 20,000 sq ft shed. Six CNCs. Forty people. Revenue ₹4 crore. And a new enemy: chaos at scale. Then one morning — an ambulance at the gate.",
+  unlock:"The full <b>SQDCM</b> board lights up — and <b>S — SAFETY</b> comes first, because nothing else matters if people get hurt. <b>C — COST</b> joins. And a master number appears: <b>PLANT OEE</b>. Yours: a humbling 52%. World class: 85%.",
+  sqdcmUnlock:["S","C","M"], founderUnlock:["oee"],
+  scenes:[
+  { art:"safety",
+    cap:"The ambulance at the gate. A young operator, rushing a job, reached past a missing guard on CNC #3 — eleven stitches across the forearm, and it could have been far worse. Production stops. Everyone gathers. The guard had been missing for a month, and everyone knew.",
+    bub:[["PAWAR","In thirty years I saw two men die. Both times, everyone knew the hazard. Both times, production came first.","shout"]],
+    fact:"Heinrich's pyramid: every serious injury sits on ~29 minor ones and ~300 near-misses. Near-misses are free warnings — if anyone reports them.",
+    choices:[
+      {label:"STOP EVERYTHING —",sub:"2-day safety audit, fix every guard.",out:"Customers grumble. But the message lands like a hammer: nothing outranks safety. Near-miss reports start flowing — eleven in a month.",fx:{S:+15,D:-6,M:+10,cash:-5}},
+      {label:"PATCH & RUN —",sub:"fix #3, brief everyone, keep moving.",out:"Schedule saved. But the floor heard the real message: deliveries outrank fingers. The next hazard won't be reported.",fx:{S:-8,D:+4,M:-8}},
+      {label:"SAFETY CHAMPION —",sub:"the injured man leads the fight.",out:"He runs the morning brief from his bandages. Nobody calls safety 'theatre' when its voice has eleven stitches.",fx:{S:+10,M:+8,cash:-2}}
+    ]},
+  { art:"whiteboard",
+    cap:"Pawar's whiteboard tells the ugly truth about your six machines: OEE 52%. Breakdowns eat 11% of running time, changeovers another 9%, waiting-for-material even more. CNC #3 — the bottleneck that sets the pace of the whole plant — died twice this month, both times mid-batch. The bank would prefer you wanted nothing at all.",
+    bub:[["SUNIL","Buy a seventh machine!"],["PAWAR","Fix the six you have.","r"]],
+    fact:"OEE multiplies: 90% × 80% × 95% = 68%, not 88%. Most unmanaged plants run 40–60% — a free factory hides inside the one you own.",
+    choices:[
+      {label:"SEVENTH MACHINE —",sub:"capacity solves everything?",out:"It absorbs the load... then idles like the rest, starved by the same chaos. You've automated waiting. OEE: 51%.",fx:{cash:-15,oee:-1,C:-6,M:+3}},
+      {label:"PM + SMED —",sub:"maintain & attack changeovers.",out:"Three unglamorous months. Breakdowns halve. Changeovers: 40 → 14 min. OEE 63%. You found a hidden machine inside your machines.",fx:{cash:-4,oee:+11,Q:+4,C:+8,M:+5}},
+      {label:"CALL CONSULTANTS —",sub:"lean assessment first.",out:"₹6 lakh for a 90-page deck saying what Pawar said free. But the value-stream map changes how you see everything.",fx:{cash:-6,oee:+4,C:+2,reputation:+4}}
+    ]},
+  { art:"rush",
+    cap:"A fire at a competitor's plant floods you with enquiries — months of revenue, begging to be taken. But your production planning is still a whiteboard and Pawar's memory. Urgent orders jump the queue daily, and every queue-jump makes three other orders late. Delivery has already slipped to 81% and customers are noticing.",
+    bub:[["YOU","(The plant doesn't need more orders. It needs a drumbeat.)","thought"]],
+    fact:"Little's Law: Lead Time = WIP ÷ Throughput. Overload a plant and it gets slower for EVERYONE. Physics doesn't negotiate.",
+    choices:[
+      {label:"TAKE IT ALL —",sub:"revenue first, systems later.",out:"Two glorious months. Then the pile-up: Delivery 68%, two customers gone, and Deshmukh issues a vendor warning.",fx:{cash:+15,D:-13,reputation:-8,M:-8,C:+4}},
+      {label:"TAKE 40% —",sub:"+ weekly frozen schedules.",out:"Saying no to money hurts. But the plant finds a cadence. Delivery rebounds to 90%. Calm is a capability.",fx:{cash:+8,D:+9,oee:+5,M:+6}},
+      {label:"SUBCONTRACT —",sub:"three small shops, audited.",out:"You become what Deshmukh was to you. One gem, one adequate, one... teaches you why incoming inspection exists.",fx:{cash:+10,Q:-6,D:+3,C:+3,reputation:+3}}
+    ]},
+  { art:"canteen",
+    cap:"The strike that almost was. New shift timings — announced by a notice on the board, the way big companies do it — land badly. You employ forty people now, and most never knew you in the old workshop days. A worker named Kale has become their voice, and the canteen goes quiet when you enter. Morale is the lowest it has ever been.",
+    bub:[["KALE","We're not machines you schedule.","shout"],["PAWAR","Hold firm.","r"]],
+    fact:"Across 1,000+ plants, the strongest predictor of defect rates is whether workers believe management listens. Toyota: 'Before we build cars, we build people.'",
+    choices:[
+      {label:"HOLD FIRM —",sub:"it's an operational necessity.",out:"You win the schedule, lose the room. Resentment hides where you can't see it — in the small extra checks nobody is paid for.",fx:{M:-12,Q:-6,oee:-3}},
+      {label:"OPEN THE BOOKS —",sub:"show why, co-design shifts.",out:"Costs on the canteen wall. Silence... questions... ideas. Kale proposes a better rotation than yours. Trust lands.",fx:{M:+14,oee:+4,resolve:+4}},
+      {label:"PAY A BONUS —",sub:"sweeten the change.",out:"Output rises. So do shortcuts. Bonus-chasing breeds quality drift. What you pay for is exactly what you get.",fx:{M:+5,oee:+5,Q:-7,cash:-5}}
+    ]},
+  { art:"kaizen",
+    cap:"After the truce, Kale turns out to be full of improvement ideas — and Pawar wants to harness that energy into a proper kaizen program: small daily improvements driven by the floor itself. Meanwhile one stubborn defect, a missed chamfer on a single operation, keeps escaping to customers. A redesigned fixture could make the mistake physically impossible.",
+    bub:[["SUNIL","Suggestion boxes are where ideas go to die."],["PAWAR","Then don't build a box. Build a habit.","r"]],
+    fact:"Toyota implements ~1 million employee ideas a year. Shigeo Shingo, father of poka-yoke: 'Errors are inevitable. Defects are optional.'",
+    choices:[
+      {label:"REAL KAIZEN —",sub:"weekly huddles, ideas live in a week.",out:"Month one: trivia. Month three: a 22-year-old's fixture idea saves ₹3 lakh/year. The floor starts owning the plant.",fx:{oee:+7,M:+8,Q:+5,C:+5,cash:-2}},
+      {label:"JUST POKA-YOKE —",sub:"fix the chamfer, move on.",out:"That defect never escapes again. Clean, surgical. But improvement stays something YOU do to the plant.",fx:{Q:+8,oee:+2}},
+      {label:"CASH PER IDEA —",sub:"pay for suggestions.",out:"A flood — recycled, gamed, occasionally brilliant. Two great fixes emerge. Messy, like most real things.",fx:{oee:+4,M:+4,cash:-5,Q:+3}}
+    ]}
+]},
+{ title:"Chapter 4", pill:"Issue #4 — The Big League", year:"YEAR SIX · NASHIK", art:"automotive",
+  head:"THE BIG LEAGUE", hook:"Quality measured in defects per million. A late truck stops a 2,000-car line.",
+  text:"A scout from Mahendra Motors visits unannounced — they always do. Second source, gearbox synchroniser hubs. The prize is huge. The air is thin.",
+  unlock:"Same board, thinner air: <b>Q</b> is now scored in <b>PPM</b> — under 50 defects per million. <b>D</b> means a truck at their dock at 6:40 AM sharp. <b>C</b> faces 3–5% price cuts. Every. Single. Year.",
+  scenes:[
+  { art:"ppap",
+    cap:"Mahendra's first hurdle: the PPAP — a documentation mountain proving your process can make their part right, every time, forever. Control plans, capability studies, measurement analysis. Done properly: four months and ₹25 lakh. Or a consultant offers a 'PPAP package' that dresses up your current process in the right paperwork.",
+    bub:[["SUNIL","It's bureaucracy."],["PAWAR","It's religion.","r"]],
+    fact:"PPAP demands Cpk ≥ 1.67 — your variation must fit the tolerance five times over. Not 'we made 5 good parts' but 'we cannot make a bad one'.",
+    choices:[
+      {label:"DO IT RIGHT —",sub:"rebuild the process, document truth.",out:"Four brutal months. You find spindle misalignment nobody ever measured. PPAP passes Level 3, first submission. Rare air.",fx:{cash:-20,Q:+12,reputation:+10,oee:+3}},
+      {label:"BUY PAPERWORK —",sub:"approved now, improve later.",out:"Approved on paper. Their auditor finds the gap between document and floor. Rating: amber. Amber fades slowly.",fx:{cash:-8,reputation:-10,Q:-4}},
+      {label:"ASK FOR TIME —",sub:"do it right, slower.",out:"'Second sources that implode help nobody.' Seven months granted. The breathing room saves your team's sanity.",fx:{cash:-14,Q:+10,reputation:+6,M:+4}}
+    ]},
+  { art:"eightd",
+    cap:"Week nine of automotive production. Mahendra's incoming inspection flags 3 bad hubs in a lot of 5,000 — that's 600 PPM against a contract limit of 50. The formal 8D complaint lands in your inbox like a court summons. Root cause hides somewhere between a tool-wear pattern and an operator who may have skipped a check. The whole plant is watching how the boss handles the first big failure.",
+    bub:[["SQE (MAHENDRA)","Root cause. Seven days. Don't bring us a name — bring us a system.","shout"]],
+    fact:"The 8D method (Ford, 1987) and Toyota's '5 Whys' share a creed: ask why five times and 'operator error' becomes a design flaw. Blame kills root cause.",
+    choices:[
+      {label:"FIND THE CULPRIT —",sub:"accountability must be visible.",out:"A good operator — exhausted from the double shift YOU approved. The firing chills the floor. Problems start hiding.",fx:{M:-12,Q:-5,S:-4,reputation:+2}},
+      {label:"BLAME THE PROCESS —",sub:"why COULD it be skipped?",out:"A poka-yoke gauge the part can't bypass + tool-life tracking. The SQE writes: 'mature quality culture.'",fx:{Q:+12,M:+8,reputation:+8,cash:-4}},
+      {label:"FIGHT IT —",sub:"3 in 5,000? Measurement uncertainty!",out:"You win the technical debate, lose the relationship. Nobody remembers metrology. Everyone remembers the supplier who argued.",fx:{reputation:-8,resolve:-4}}
+    ]},
+  { art:"covid",
+    cap:"Then the world stops. A virus with a crown-shaped name empties the roads of Nashik. Lockdown: Mahendra's plant shut, your plant shut, revenue at zero — while salaries, EMIs and rent march on like an army that never sleeps. The burn rate is ₹45 lakh a month, and nobody on earth knows how long this lasts.",
+    bub:[["VIKRAM","40% layoffs by Friday. It's arithmetic."],["PAWAR","A factory is not the machines. Lose the people, lose the factory.","r","shout"]],
+    fact:"April 2020: Indian auto production hit literally ZERO for the first month ever. Suppliers who kept skilled workers recovered 3–4 months faster than deep-cutters.",
+    choices:[
+      {label:"NO LAYOFFS —",sub:"your salary to zero, protect every job.",out:"Four months of fear. Then the rebound hits like a flood — and you're the only supplier at full strength. Loyalty was working capital.",fx:{cash:-22,M:+15,reputation:+10,D:+8}},
+      {label:"CUT 40% —",sub:"survive certain, rebuild later.",out:"You survive comfortably. The rebound finds you short-handed; your machinists now work for rivals. The floor remembers who blinked.",fx:{cash:+8,M:-15,D:-8,Q:-5}},
+      {label:"PIVOT —",sub:"ventilator parts under emergency orders.",out:"Eighteen-hour days retooling to medical tolerances. Thin margins, frantic certs — but salaries flow, and your team makes the national press.",fx:{cash:-6,reputation:+14,M:+10,oee:-4}}
+    ]},
+  { art:"plant_choice",
+    cap:"Recovery brings a bigger question: scale-up needs a whole new plant. Path one — greenfield near Mahendra in Nashik: ₹18 crore, two years of construction, but designed perfectly from day one. Path two — acquire struggling Patil Auto Parts: a ready plant with an IATF certificate, tired machines, and 130 demoralised employees. The bank, for once, will fund either.",
+    bub:[["VIKRAM","Buy Patil. Speed wins."],["PAWAR","You can't un-bake a bad cake.","r"]],
+    fact:"Layout is destiny: parts in a bad factory travel 10–50× the value-adding distance. You pay for every metre. Forever.",
+    choices:[
+      {label:"GREENFIELD —",sub:"design the perfect plant.",out:"Two years of capex sweats. Then — a plant that flows like water. 78% OEE in year one. Pawar cries at the opening. 'Dust,' he says.",fx:{cash:-25,oee:+12,Q:+6,S:+6,M:+6}},
+      {label:"ACQUIRE PATIL —",sub:"speed over perfection.",out:"Day one: revenue, certificate... culture debt. 30 leave, others bloom. Faster, uglier, cheaper. Probably right. Never sure.",fx:{cash:-15,oee:+4,M:-5,reputation:+6,D:+5}},
+      {label:"SQUEEZE —",sub:"third shift + flow redesign.",out:"40% more from the same walls — the cheapest capacity on earth hides in your own plant. But the ceiling is now visible.",fx:{cash:-5,oee:+9,D:+4,C:+8,M:-3,S:-2}}
+    ]},
+  { art:"ev",
+    cap:"The EV question. Mahendra announces 30% electric by 2030 — and synchroniser hubs, your bread and butter, simply don't exist inside an EV. Your engineers identify adjacent prizes: e-axle housings, motor shafts, battery frames. All demand new machines, new competencies, and capital you'd rather not bet blind.",
+    bub:[["SUNIL","We can be early, on time, or dead.","shout"]],
+    fact:"An ICE powertrain: ~2,000 moving parts. An EV drivetrain: ~20. Up to 40% of traditional powertrain supplier revenue is at risk by 2035.",
+    choices:[
+      {label:"PIVOT HARD —",sub:"full EV line + R&D, now.",out:"Painfully early — 30% load for 18 months. Then orders flood, and you're one of three qualified suppliers in the country.",fx:{cash:-18,reputation:+12,oee:-5,C:-5,resolve:+5}},
+      {label:"CO-DEVELOP —",sub:"learn on a customer's money.",out:"Motor-shaft development contract: modest revenue, priceless learning. A customer pulls you forward instead of capital pushing you blind.",fx:{cash:-5,reputation:+8,Q:+4}},
+      {label:"MILK ICE —",sub:"gearboxes outlive hype.",out:"Three fat years. Then rivals announce EV lines, and Mahendra asks for your 'future readiness roadmap'. You don't have one.",fx:{cash:+15,C:+6,reputation:-8,resolve:-5}}
+    ]}
+]},
+{ title:"Chapter 5", pill:"Issue #5 — The World", year:"YEAR ELEVEN · HANNOVER", art:"globe",
+  head:"THE WORLD", hook:"'Indian suppliers promise everything and audit poorly. Convince us you're different.'",
+  text:"Three plants. 900 people. ₹220 crore. At Hannover Messe, a German Tier-1 stops at your booth — and stays an hour.",
+  unlock:"The global game is the whole board at once. OEE proves competitiveness. PPM earns entry. Delivery across oceans keeps it. And culture? That's what auditors smell in the first ten minutes.",
+  scenes:[
+  { art:"audit",
+    cap:"Brandt's audit is unlike anything you've faced: two days, three German auditors, and your actual shop floor — not your conference room. They interview operators alone. They ask a 23-year-old on line 4 what she does with a suspect part. They time a changeover with their own stopwatch. A week before, Sunil offers to 'prepare' the floor.",
+    bub:[["SUNIL","Let me 'prepare' the floor. Banners. Briefing cards."],["YOU","(Do they audit the plant... or the truth?)","thought","r"]],
+    fact:"VDA 6.3 auditors are trained to detect 'audit theatre' — they ask the same question three ways, to three people, on two days.",
+    choices:[
+      {label:"NO THEATRE —",sub:"they see a normal Tuesday.",out:"The operator on line 4 answers from habit, not script: she pulls the andon cord. 89/100. 'The most honest plant we have audited in Asia.'",fx:{reputation:+14,M:+8}},
+      {label:"PAINT & SCRIPTS —",sub:"first impressions count.",out:"The floor gleams. Then one off-script question, and a rehearsed answer collapses live. 71/100: 'evidence of audit preparation.'",fx:{reputation:-6,M:-4,cash:-3}},
+      {label:"POSTPONE —",sub:"fix the real gaps first.",out:"Six months later you score 92 — and watch a Thai rival take the first program while you were perfecting. Time has a price.",fx:{Q:+8,reputation:+4,cash:-6}}
+    ]},
+  { art:"ship",
+    cap:"The contract comes: e-axle housings shipped to Brandt's plant in Hungary, 11,000 km away. Delivery now involves the Suez canal's moods, euro exposure, and customs paperwork in two languages. One late vessel could idle their assembly line at €40,000 an hour — and someone would have to pay.",
+    bub:[["SUPPLY CHAIN HEAD","Suez moods, euro swings, and a customs officer's lunch schedule. Pick your armour."]],
+    fact:"When the Ever Given blocked Suez for 6 days, ~$60 billion in trade stalled and European lines stopped within 10 days.",
+    choices:[
+      {label:"AIR-FREIGHT VOW —",sub:"any delay risk → fly it. Whatever it costs.",out:"Twice in year one: ₹40 lakh burned in the sky. Brandt never sees a late part — and tells other divisions about you.",fx:{cash:-10,D:+12,C:-6,reputation:+10}},
+      {label:"HUNGARY BUFFER —",sub:"3 weeks of stock near their plant.",out:"Working capital groans, but deliveries become boring — logistics' highest compliment. The warehouse becomes your European beachhead.",fx:{cash:-12,D:+10,C:-3,oee:+2}},
+      {label:"INCOTERMS SHIELD —",sub:"risk transfers at the Indian port.",out:"Legally elegant. Commercially naive. The first late vessel is 'not your fault' on paper and entirely your fault in the planner's rack.",fx:{cash:+4,D:-8,reputation:-8}}
+    ]},
+  { art:"ai",
+    cap:"The AI question arrives wearing a hoodie. Your new digital head — poached from a Bengaluru startup — demos her pilot: sensors on CNC #14 predicted a spindle bearing failure nine days before it happened. Now she wants ₹8 crore for the full smart factory: sensors everywhere, AI vision inspection, a digital twin of the whole Nashik plant.",
+    bub:[["SUNIL","I've seen 'Industry 4.0' decks since 2015. Most bought dashboards, not results."],["PAWAR","We listened to machines with a screwdriver to the ear. If a computer listens better — let it listen.","r"]],
+    fact:"~70% of digital-manufacturing pilots die in 'pilot purgatory'. Winners digitise processes they had ALREADY stabilised. AI on chaos just predicts chaos faster.",
+    choices:[
+      {label:"FULL SMART FACTORY —",sub:"₹8 crore, every line, two years.",out:"Year one: data swamps, three vendors fired. Year two: the curve bends — vision systems catching 12-PPM defects. Brandt photographs YOUR dashboards.",fx:{cash:-20,oee:+10,Q:+8,C:+6}},
+      {label:"ONE USE-CASE AT A TIME —",sub:"bottleneck machines first.",out:"Unfashionable and effective. Each win funds the next. Three years later: same smart factory, profitably, with the floor's trust.",fx:{cash:-8,oee:+8,Q:+5,M:+4}},
+      {label:"DECLINE —",sub:"machines + skilled people built this.",out:"Two years, nothing bad happens — that's the trap. Then a rival wins a Brandt program on real-time quality data you can't provide.",fx:{cash:+5,reputation:-9,C:-4}}
+    ]},
+  { art:"legacy",
+    cap:"The endgame question. You are 54. Revenue ₹600 crore, three plants, your parts on three continents. A global private equity fund offers to buy 60% at a valuation that would make your grandfather's toolbox worth its weight in gold. Vikram wants to sell. Pawar, retired, visits on Fridays and says nothing — which, as always, says everything. And your daughter, an engineer, has quietly started attending your management reviews.",
+    bub:[["PE PARTNER","What do you want your name to mean?"],["PAWAR","...","r","thought"]],
+    fact:"Germany's Mittelstand counts 1,500+ 'hidden champions' owned for generations, not quarters. Japan has 33,000+ companies over a century old.",
+    choices:[
+      {label:"SELL 60% —",sub:"take the wealth, keep a board seat.",out:"More zeros than your first year's revenue. The company grows. Something else doesn't. Fridays, you and Pawar drink tea and don't talk about it.",fx:{cash:+30,resolve:-5,M:-6}},
+      {label:"100-YEAR COMPANY —",sub:"refuse. Groom the next generation.",out:"Slower wealth, deeper roots. Your daughter starts — at her own insistence — on the Chakan shop floor. Succession IS the strategy.",fx:{resolve:+10,M:+10,reputation:+8}},
+      {label:"COUNTER —",sub:"minority stake funds a Mexico plant.",out:"Good assets negotiate. Ground breaks in Monterrey. The buyer of a pigeon-filled workshop now reads OEE across nine time zones before breakfast.",fx:{cash:+15,reputation:+10,oee:+3,resolve:+3}}
+    ]}
+]}];
+
+// ================= DIFFICULTY =================
+const DIFFS={
+  easy:{key:"easy",name:"APPRENTICE",cash:50,resolve:72,pos:1.15,neg:0.7,
+    desc:"The forge is kind to newcomers. Setbacks sting less, wins carry further. Learn the language of the floor."},
+  normal:{key:"normal",name:"OPERATOR",cash:40,resolve:60,pos:1,neg:1,
+    desc:"The real game. Fair but never generous — every trade-off lands at full weight."},
+  hard:{key:"hard",name:"FORGE MASTER",cash:32,resolve:55,pos:.85,neg:1.3,
+    desc:"You said you lead. Leaders get audited. Less cash, harsher consequences — judgment is the job."}
+};
+let PLAYER={name:"Founder",diff:DIFFS.normal};
+
+// ================= ENGINE =================
+let G={ch:0,sc:-1,
+  founder:{cash:40,resolve:60,reputation:15},
+  founderActive:["cash","resolve","reputation"],
+  board:{S:60,Q:70,D:75,C:55,M:65},
+  boardActive:[],log:[],snap:null,usedEvents:[],
+  // story flags — set by choices, change everything downstream
+  flags:{pawar:false,vikram:false,sunil:false,cnc:false}};
+
+// Which choice sets which flag: [chapter, scene, choiceIndex, flag]
+const FLAG_SETTERS=[
+  [0,0,2,"vikram"],  // take Vikram as partner
+  [0,1,0,"pawar"],   // hire Pawar
+  [0,1,2,"cnc"],     // lease the CNC
+  [1,2,0,"sunil"]    // hire Sunil
+];
+
+// Characters change role depending on your history
+function mapWho(who){
+  if(who==="PAWAR"&&!G.flags.pawar)return "PAWAR (FRIDAY ADVISOR)";
+  if(who==="VIKRAM"&&!G.flags.vikram)return "YOUR CFO";
+  if(who==="SUNIL"&&!G.flags.sunil)return "TOOLING HEAD";
+  return who;
+}
+
+// Rewrites story text so it never contradicts your choices
+function processText(t){
+  if(!t)return t;
+  if(G.flags.cnc){
+    t=t.replace("your old lathe can hold it on a good day, with Pawar's hands","your leased CNC can hold it — if the program and fixturing are right");
+  }
+  if(!G.flags.pawar){
+    t=t.replace("with Pawar's hands","if your own hands hold steady");
+    t=t.replace("Pawar's whiteboard tells","The whiteboard — chalked by Pawar on a Friday visit — tells");
+    t=t.replace("Pawar threatens to retire. Twice.","Pawar threatens to stop his Friday visits. Twice.");
+    t=t.replace("and Pawar has started muttering about discipline","and old Pawar — never hired, yet at your gate every Friday, unpaid and usually right — mutters about discipline");
+    t=t.replace("Pawar, retired, visits on Fridays","Old Pawar, your unpaid conscience all these years, still visits on Fridays");
+    t=t.replace("Pawar cries at the opening.","Old Pawar — who never took a salary from you — cries at the opening.");
+  }
+  if(!G.flags.vikram){
+    t=t.replace("Vikram wants to sell.","Your CFO is dazzled by the multiple.");
+  }
+  return t;
+}
+
+// Past choices pay off (or cost you) later — shown to the player
+const SYNERGY=[
+  {ch:2,sc:1,i:1,flag:"pawar",fx:{oee:2},note:"⚙ Because Pawar runs your floor, his maintenance instincts compound the gains."},
+  {ch:2,sc:1,i:1,flagNot:"pawar",fx:{oee:-1},note:"⚙ Without a veteran maintainer on payroll, the PM program learns by trial and error."},
+  {ch:3,sc:0,i:0,flag:"sunil",fx:{Q:2},note:"⚙ Sunil's fixture genius makes the capability studies sing."},
+  {ch:3,sc:3,i:1,flag:"vikram",fx:{cash:3},note:"⚙ Vikram grinds the acquisition price down over three late-night calls."},
+  {ch:1,sc:0,i:0,flag:"cnc",fx:{Q:3},note:"⚙ The leased CNC holds tolerance even at full speed — that early bet pays off."}
+];
+const $=id=>document.getElementById(id);
+const stage=$("stage");
+const clamp=v=>Math.max(0,Math.min(100,v));
+const tileClass=v=>v>=70?"green":v>=45?"amber":"red";
+let tiltN=0; const tilt=()=>"tilt"+(++tiltN%2+1);
+
+function renderKPIs(deltas={}){
+  $("kpis").innerHTML=G.founderActive.map(k=>{
+    const m=FOUNDER_METRICS[k],v=G.founder[k],d=deltas[k]||0;
+    const dh=d?`<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>`:"";
+    return `<div class="kpi"><div class="label">${m.name}</div><div class="val">${m.fmt(v)}${dh}</div><div class="bar"><i style="width:${v}%;background:${m.color}"></i></div></div>`;
+  }).join("");
+  renderBoard(deltas);
+}
+function renderBoard(deltas={}){
+  if(!G.boardActive.length){$("sqdcmWrap").innerHTML="";return;}
+  const tiles=SQDCM.map(t=>{
+    if(!G.boardActive.includes(t.key))return `<div class="tile locked"><div class="letter">${t.key}</div><div class="tname">${t.name}</div><div class="tval">🔒</div></div>`;
+    const v=G.board[t.key],d=deltas[t.key]||0;
+    const dh=d?`<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>`:"";
+    return `<div class="tile ${tileClass(v)}"><div class="letter ${d?'flash':''}">${t.key}</div><div class="tname">${t.name}</div><div class="tval">${v}${dh}</div></div>`;
+  }).join("");
+  $("sqdcmWrap").innerHTML=`<div class="sqdcm"><div class="board-title"><span>Plant Board · SQDCM</span><span>≥70 🟢 · ≥45 🟡 · &lt;45 🔴</span></div><div class="tiles">${tiles}</div></div>`;
+}
+function bubbles(bub){
+  if(!bub)return"";
+  return bub.map(b=>{
+    const cls=["bubble",...b.slice(2)].join(" ");
+    return `<div class="${cls}"><span class="who">${mapWho(b[0])}</span>${processText(b[1])}</div>`;
+  }).join("");
+}
+function bam(text,bad){
+  const el=document.createElement("div");
+  el.className="bam"+(bad?" badbam":"");el.textContent=text;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),950);
+  if(bad){document.querySelector(".app").classList.add("shake");setTimeout(()=>document.querySelector(".app").classList.remove("shake"),520);}
+}
+const GOODBAMS=["KA-CHING!","DING!","BOOM!","NAILED IT!","SHIPPED!"];
+const BADBAMS=["CLANG!","CRASH!","THUD!","OUCH!","SCRAP!"];
+
+// ---- onboarding ----
+const OB={exp:null,field:null,role:null};
+function obPick(g,i,btn){SFX.click();OB[g]=i;[...btn.parentElement.children].forEach(b=>b.classList.remove("sel"));btn.classList.add("sel");checkObReady();}
+function checkObReady(){const ok=$("obName").value.trim().length>0&&OB.exp!==null&&OB.field!==null&&OB.role!==null;$("obBtn").disabled=!ok;}
+function showOnboarding(){
+  $("pill").textContent="Issue #0 — Origin Story";
+  stage.innerHTML=`<div class="panel ob ${tilt()}">
+    ${ART.workshop_gate}
+    <div class="inner">
+      <div class="caption">Every hero gets an origin panel. Who walks into the forge?</div>
+      <label>YOUR NAME</label>
+      <input type="text" id="obName" maxlength="20" placeholder="What should the story call you?" oninput="checkObReady()">
+      <label>YEARS IN THE TRENCHES</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('exp',0,this)">0–5 yrs</button>
+        <button class="opt" onclick="obPick('exp',1,this)">5–15 yrs</button>
+        <button class="opt" onclick="obPick('exp',2,this)">15+ yrs</button>
+      </div>
+      <label>YOUR FIELD</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('field',0,this)">Manufacturing / Ops</button>
+        <button class="opt" onclick="obPick('field',1,this)">Engineering / R&D</button>
+        <button class="opt" onclick="obPick('field',2,this)">Business / Finance</button>
+        <button class="opt" onclick="obPick('field',3,this)">Other / Student</button>
+      </div>
+      <label>AND HONESTLY... WHO ARE YOU?</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('role',0,this)">CEO at heart</button>
+        <button class="opt" onclick="obPick('role',1,this)">A manager — I run things</button>
+        <button class="opt" onclick="obPick('role',2,this)">A great individual contributor</button>
+        <button class="opt" onclick="obPick('role',3,this)">Still figuring it out</button>
+      </div>
+      <div style="margin-top:20px;text-align:center"><button class="btn" id="obBtn" disabled onclick="assignDifficulty()">ENTER THE FORGE →</button></div>
+    </div></div>`;
+}
+function assignDifficulty(){
+  PLAYER.name=$("obName").value.trim();
+  applyProfile();
+}
+function applyProfile(){
+  SFX.chapter();
+  // Weighted scoring — ALL three factors count, and the player sees the math.
+  const roleW=[3,2,1,0][OB.role];                    // CEO 3 · manager 2 · IC 1 · figuring out 0
+  const expW=[0,1.5,3][OB.exp];                      // 0–5y 0 · 5–15y 1.5 · 15+y 3
+  const fieldW=[1,.5,0,0][OB.field];                 // mfg/ops 1 · engineering .5 · others 0
+  const score=roleW+expW+fieldW;                     // 0 … 7
+  PLAYER.diff=score>=5?DIFFS.hard:score>=2.5?DIFFS.normal:DIFFS.easy;
+  G.founder.cash=PLAYER.diff.cash;G.founder.resolve=PLAYER.diff.resolve;
+  const d=PLAYER.diff;
+  const roleTxt=["CEO at heart","Manager","Individual contributor","Still figuring it out"][OB.role];
+  const expTxt=["0–5 yrs","5–15 yrs","15+ yrs"][OB.exp];
+  const fieldTxt=["Manufacturing / Ops","Engineering / R&D","Business / Finance","Other / Student"][OB.field];
+  const reason=d.key==="hard"?"Experience plus a leadership claim — the forge treats you like a leader. No training wheels."
+    :d.key==="normal"?"You know how things run. The forge deals with you plainly — fair, never soft."
+    :"Everyone starts somewhere — even Honda started in a shack. The forge teaches before it tests.";
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    ${ART.old_lathe}
+    <div class="inner" style="text-align:center">
+      <div class="caption">The forge sizes you up... and shows its working.</div>
+      <h2 style="font-family:'Bangers',cursive;font-size:26px;letter-spacing:1px">WELCOME, ${PLAYER.name.toUpperCase()}.</h2>
+      <div class="diff-badge ${d.key}">MODE: ${d.name}</div>
+      <div style="text-align:left;font-size:14.5px;background:#fff;border:2px solid #000;border-radius:8px;padding:9px 13px;margin:8px 0;box-shadow:3px 3px 0 rgba(0,0,0,.25)">
+        <b style="font-family:'Bangers',cursive;letter-spacing:1px">THE MATH:</b><br>
+        Identity — ${roleTxt}: <b>+${roleW}</b><br>
+        Experience — ${expTxt}: <b>+${expW}</b><br>
+        Field — ${fieldTxt}: <b>+${fieldW}</b><br>
+        Total <b>${score} / 7</b> &nbsp;→&nbsp; ${score>=5?"5+ = FORGE MASTER":score>=2.5?"2.5–4.5 = OPERATOR":"under 2.5 = APPRENTICE"}
+      </div>
+      <p style="text-align:left;font-size:16px;line-height:1.5;margin:8px 0">${reason}</p>
+      <p style="text-align:left;font-size:15px;color:#555;margin-bottom:14px"><em>${d.desc}</em><br>Start: <b>₹${d.cash}L</b> · <b>${d.resolve} resolve</b> · setbacks ×${d.neg} · wins ×${d.pos}</p>
+      <button class="btn" onclick="SFX.chapter();showChapterIntro()">BEGIN ISSUE #1 →</button>
+    </div></div>`;
+  renderKPIs();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function snapshot(){G.snap={founder:{...G.founder},board:{...G.board},fActive:[...G.founderActive],bActive:[...G.boardActive]};}
+
+function showChapterIntro(){
+  const ch=CHAPTERS[G.ch];
+  $("pill").textContent=ch.pill+" · "+PLAYER.name;
+  snapshot();
+  if(ch.sqdcmUnlock){ch.sqdcmUnlock.forEach(k=>{if(!G.boardActive.includes(k))G.boardActive.push(k);});SFX.unlock();}
+  if(ch.founderUnlock)ch.founderUnlock.forEach(k=>{if(!G.founderActive.includes(k)){G.founderActive.push(k);G.founder[k]=k==="oee"?52:50;}});
+  G.boardActive.sort((a,b)=>SQDCM.findIndex(t=>t.key===a)-SQDCM.findIndex(t=>t.key===b));
+  renderKPIs();
+  stage.innerHTML=`<div class="panel splash">
+    ${ART[ch.art]}
+    <div class="chnum">${ch.title} · ${ch.year}</div>
+    <div class="chname">${ch.head}</div>
+    <div class="hook">“${ch.hook}”</div>
+    <div style="padding:0 24px 4px"><p style="font-size:16px;line-height:1.55;color:#333;text-align:left;max-width:560px;margin:0 auto 14px">${processText(ch.text)}${G.ch===1&&!G.flags.pawar?" <em>(Mr. Pawar, never hired, still appears at your gate every Friday — unpaid, unstoppable, and usually right.)</em>":""}${G.ch===2&&!G.flags.sunil?" <em>(You eventually found a young tooling head — steady hands, still earning his stripes.)</em>":""}</p></div>
+    ${ch.unlock?`<div class="unlock">📊 ${ch.unlock}</div>`:""}
+    <div style="padding-bottom:24px"><button class="btn" onclick="SFX.click();nextScene()">OPEN THE PAGE →</button></div>
+  </div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function maybeEvent(cb){
+  // 35% chance of a plot twist from chapter 2 on
+  if(G.ch===0||Math.random()>0.35||G.usedEvents.length>=EVENTS.length){cb();return;}
+  let pool=EVENTS.map((e,i)=>i).filter(i=>!G.usedEvents.includes(i));
+  const idx=pool[Math.floor(Math.random()*pool.length)];
+  G.usedEvents.push(idx);
+  const ev=EVENTS[idx];
+  SFX.event(); bam(ev.flag, ev.snd==="bad");
+  const deltas={};
+  for(const k in ev.fx){
+    const isB=G.boardActive.includes(k),isF=G.founderActive.includes(k);
+    if(!isB&&!isF)continue;
+    deltas[k]=ev.fx[k];
+    if(isB)G.board[k]=clamp(G.board[k]+ev.fx[k]);else G.founder[k]=clamp(G.founder[k]+ev.fx[k]);
+  }
+  renderKPIs(deltas);
+  const fxHtml=Object.entries(deltas).map(([k,d])=>{
+    const n=FOUNDER_METRICS[k]?FOUNDER_METRICS[k].name:SQDCM.find(t=>t.key===k).name;
+    return `<span class="${d>=0?'up':'down'}">${n} ${d>=0?'+':''}${d}</span>`;}).join("");
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    ${ART[ev.art]}
+    <div class="inner">
+      <div class="event-flag">⚡ ${ev.flag}</div>
+      <div class="caption mid">${ev.cap}</div>
+      <div class="effects">${fxHtml}</div>
+      <button class="btn" onclick="SFX.click();(${cb.name})()">AND THEN... →</button>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextScene(){
+  G.sc++;
+  const ch=CHAPTERS[G.ch];
+  if(G.sc>=ch.scenes.length){chapterReport();return;}
+  maybeEvent(renderScene);
+}
+function renderScene(){
+  const ch=CHAPTERS[G.ch],s=ch.scenes[G.sc];
+  renderKPIs();
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    ${ART[s.art]||""}
+    <div class="inner">
+      <div class="caption">${processText(s.cap)}</div>
+      ${bubbles(s.bub)}
+      <div class="choices">${s.choices.map((c,i)=>`<button class="choice" onclick="pick(${i})"><b>${c.label}</b>${c.sub||""}</button>`).join("")}</div>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function pick(i){
+  const ch=CHAPTERS[G.ch],s=ch.scenes[G.sc],c=s.choices[i];
+  SFX.choose();
+  // set story flags
+  FLAG_SETTERS.forEach(([fc,fs,fi,flag])=>{if(G.ch===fc&&G.sc===fs&&i===fi)G.flags[flag]=true;});
+  // past choices echo into this one
+  let synNote="";
+  const fx={...c.fx};
+  SYNERGY.forEach(sy=>{
+    if(sy.ch===G.ch&&sy.sc===G.sc&&sy.i===i&&
+       ((sy.flag&&G.flags[sy.flag])||(sy.flagNot&&!G.flags[sy.flagNot]))){
+      for(const k in sy.fx)fx[k]=(fx[k]||0)+sy.fx[k];
+      synNote=sy.note;
+    }
+  });
+  const deltas={};let net=0;
+  for(const k in fx){
+    const isB=G.boardActive.includes(k),isF=G.founderActive.includes(k);
+    if(!isB&&!isF)continue;
+    const jit=Math.abs(fx[k])>2?Math.floor(Math.random()*3)-1:0;
+    const d=Math.round(fx[k]*(fx[k]<0?PLAYER.diff.neg:PLAYER.diff.pos))+jit;
+    deltas[k]=d;net+=d;
+    if(isB)G.board[k]=clamp(G.board[k]+d);else G.founder[k]=clamp(G.founder[k]+d);
+  }
+  G.log.push({chapter:ch.pill,choice:c.label.replace(" —","")});
+  renderKPIs(deltas);
+  const bad=net<0;
+  setTimeout(()=>{bad?SFX.bad():SFX.good();
+    bam(bad?BADBAMS[Math.floor(Math.random()*BADBAMS.length)]:GOODBAMS[Math.floor(Math.random()*GOODBAMS.length)],bad);},150);
+  if(G.founder.cash<=0){gameOver("cash",c);return;}
+  if(G.founder.resolve<=0){gameOver("resolve",c);return;}
+  const fxHtml=Object.entries(deltas).map(([k,d])=>{
+    const n=FOUNDER_METRICS[k]?FOUNDER_METRICS[k].name:SQDCM.find(t=>t.key===k).name;
+    return `<span class="${d>=0?'up':'down'}">${n} ${d>=0?'+':''}${d}</span>`;}).join("");
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    ${ART[s.art]||""}
+    <div class="inner">
+      <div class="caption">${processText(c.out)}</div>
+      <div class="effects">${fxHtml}</div>
+      ${synNote?`<div class="fact" style="border-left-color:#c46a10"><b style="color:#b3530a">↩ YOUR PAST CHOICES</b>${synNote}</div>`:""}
+      ${s.fact?`<div class="fact"><b>⚙ FORGE FACT</b>${s.fact}</div>`:""}
+      <button class="btn" onclick="SFX.click();nextScene()">NEXT PANEL →</button>
+    </div></div>`;
+}
+
+function chapterReport(){
+  const ch=CHAPTERS[G.ch];
+  const rows=[];
+  const addRow=(name,was,now,color,fmt)=>{
+    const d=now-(was===null?now:was);
+    const dh=was===null?`<span class="up">NEW!</span>`:`<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${d}</span>`;
+    rows.push(`<div class="rowm"><span class="mname">${name}</span>
+      <div class="dual"><span class="was" style="width:${was===null?0:was}%"></span><span class="now" style="width:${now}%;background:${color}"></span></div>
+      <span>${fmt(now)} ${dh}</span></div>`);
+  };
+  G.founderActive.forEach(k=>{const m=FOUNDER_METRICS[k];
+    addRow(m.name,G.snap.fActive.includes(k)?G.snap.founder[k]:null,G.founder[k],"#c46a10",m.fmt);});
+  G.boardActive.forEach(k=>{const t=SQDCM.find(t=>t.key===k);
+    addRow(t.key+" · "+t.name,G.snap.bActive.includes(k)?G.snap.board[k]:null,G.board[k],"#2a8c8c",v=>v);});
+  const all=[...G.founderActive.filter(k=>G.snap.fActive.includes(k)).map(k=>G.founder[k]-G.snap.founder[k]),
+             ...G.boardActive.filter(k=>G.snap.bActive.includes(k)).map(k=>G.board[k]-G.snap.board[k])];
+  const net=all.reduce((a,b)=>a+b,0),worst=Math.min(...all,0);
+  const verdict=net>=15?`${PLAYER.name}, the chapter ends stronger than it began. Pawar would call that a good month — and Pawar doesn't say that.`
+    :net>=0?`You held the line, ${PLAYER.name}. Holding the line while growing is quieter than glory — and rarer.`
+    :worst<=-10?`A bruising chapter, ${PLAYER.name}. Something gave way back there. The forge remembers — but it also reheats.`
+    :`A costly stretch, ${PLAYER.name}. Every founder has chapters they'd rewrite. The next page is blank.`;
+  const isLast=G.ch>=CHAPTERS.length-1;
+  SFX.unlock();
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    <div class="inner">
+      <div class="caption">END OF ${ch.pill.split("—")[0].trim().toUpperCase()} — the scoreboard doesn't blink.</div>
+      <h2 style="font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;margin-bottom:4px">WHERE YOU STARTED → WHERE YOU STAND</h2>
+      <p style="font-size:13px;color:#777;margin-bottom:6px">grey = chapter start · colour = now</p>
+      ${rows.join("")}
+      <p class="verdict">${verdict}</p>
+      <div style="text-align:center"><button class="btn" onclick="SFX.chapter();advanceChapter()">${isLast?"THE FINAL PAGE →":"NEXT ISSUE →"}</button></div>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function advanceChapter(){
+  G.ch++;G.sc=-1;
+  if(G.ch>=CHAPTERS.length){ending();return;}
+  showChapterIntro();
+}
+
+function gameOver(why,c){
+  SFX.gameover();bam("GAME OVER",true);
+  const msg=why==="cash"
+    ?"The account hits zero. The bank's letter is polite and final. The machines go to a man who haggles over the lathe Pawar loved."
+    :"One morning you can't get out of the car in the parking lot. The body keeps score — and it has called the debt.";
+  stage.innerHTML=`<div class="panel ${tilt()}">
+    ${ART.workshop_gate}
+    <div class="inner">
+      <div class="event-flag">■ THE STORY ENDS HERE</div>
+      <div class="caption mid">${c.out}</div>
+      <p style="font-size:16px;line-height:1.5;margin:10px 0"><em>${msg}</em></p>
+      <p style="font-size:16px">But founders are made of restarts, ${PLAYER.name}.</p>
+      <div style="text-align:center;margin-top:14px"><button class="btn" onclick="location.reload()">BEGIN AGAIN</button></div>
+    </div></div>`;
+}
+
+function ending(){
+  $("pill").textContent="Final Issue · "+PLAYER.name;
+  renderKPIs();
+  const allVals=[...G.founderActive.map(k=>G.founder[k]),...G.boardActive.map(k=>G.board[k])];
+  const avg=Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length);
+  let title,text;
+  if(avg>=72){title="THE LEGEND OF THE FORGE";
+    text="Business schools write the case study. The pigeon-filled workshop is preserved at the Nashik plant entrance — shutters, oil stains and all — with a plaque: <em>'Every great factory was once one person's unreasonable decision.'</em> On Friday evenings you still walk a shop floor, picking up a part, feeling the finish, the way Pawar taught you.";}
+  else if(avg>=55){title="THE BUILDER";
+    text="Not every battle won — but the war, decisively. A global manufacturer stands where a rusty shutter hung. ITI kids now run plants. The truest balance sheet: a few thousand families, three towns, and one industry are different because you got fed up at the right moment.";}
+  else{title="THE SURVIVOR";
+    text="Harder than the books said, lonelier than anyone warned. But the company stands — scarred, real, yours. Most people never find out what they'd do. You did.";}
+  const weak=SQDCM.filter(t=>G.boardActive.includes(t.key)).sort((a,b)=>G.board[a.key]-G.board[b.key])[0];
+  SFX.chapter();
+  stage.innerHTML=`<div class="panel splash">
+    ${ART.legacy}
+    <div class="chnum">FINAL ISSUE · ${PLAYER.name.toUpperCase()} · ${PLAYER.diff.name} MODE</div>
+    <div class="chname">${title}</div>
+    <div class="hook">Overall ${avg}/100 · Weakest tile: ${weak.name} (${G.board[weak.key]})</div>
+    <div style="padding:0 26px"><p style="font-size:16px;line-height:1.6;color:#333;text-align:left;max-width:560px;margin:0 auto 16px">${text}</p>
+    <div class="timeline" style="max-width:560px;margin:0 auto">${G.log.map(l=>`<div class="row"><span class="ch">${l.chapter.split("—")[0]}</span><span>${l.choice}</span></div>`).join("")}</div></div>
+    <div style="padding:18px 0 26px"><button class="btn" onclick="location.reload()">LIVE IT AGAIN</button></div>
+  </div>`;
+}
+
+// If the intro already collected the profile, skip onboarding and show the verdict
+const Q=new URLSearchParams(location.search);
+if(Q.has("name")&&Q.has("exp")&&Q.has("field")&&Q.has("role")){
+  PLAYER.name=decodeURIComponent(Q.get("name")).slice(0,20)||"Founder";
+  OB.exp=Math.min(2,Math.max(0,+Q.get("exp")||0));
+  OB.field=Math.min(3,Math.max(0,+Q.get("field")||0));
+  OB.role=Math.min(3,Math.max(0,+Q.get("role")||0));
+  PLAYER.gender=Q.get("g")||"";
+  renderKPIs();
+  applyProfile();
+}else{
+  renderKPIs();
+  showOnboarding();
+}
+</script>
+</body>
+</html>

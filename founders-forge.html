@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Founder's Forge — A Manufacturing Story</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161d27; --panel2:#1f2937; --border:#2c3a4d;
+    --text:#e9eef4; --muted:#8b99a9; --accent:#f0a132; --green:#3ecf8e;
+    --red:#ef5e5e; --blue:#5aa6f0; --purple:#a98df0; --teal:#46c8c8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:20px}
+  .app{width:100%;max-width:780px}
+  header{text-align:center;margin-bottom:18px}
+  h1{font-size:26px;letter-spacing:1px}
+  h1 span{color:var(--accent)}
+  .chapter-pill{display:inline-block;background:var(--panel);border:1px solid var(--border);padding:5px 16px;border-radius:20px;font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:1px;text-transform:uppercase}
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 12px;animation:fade .5s}
+  .kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;white-space:nowrap}
+  .kpi .val{font-size:17px;font-weight:600}
+  .bar{height:5px;background:var(--panel2);border-radius:3px;margin-top:6px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
+  .delta{font-size:11px;margin-left:5px}
+  .up{color:var(--green)} .down{color:var(--red)}
+  /* Cards */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:16px;animation:fade .45s}
+  .card h2{font-size:18px;margin-bottom:12px;color:var(--accent)}
+  .chapter-title{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:6px}
+  .story{font-size:15px;line-height:1.75;margin-bottom:18px;color:var(--text)}
+  .story em{color:var(--muted)}
+  .choices{display:grid;gap:10px}
+  .choice{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font-size:14px;line-height:1.5;transition:border-color .15s,transform .15s;font-family:inherit}
+  .choice:hover{border-color:var(--accent);transform:translateX(4px)}
+  .outcome p{line-height:1.7;margin-bottom:14px;font-size:15px}
+  .effects{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;font-size:13px}
+  .btn{background:var(--accent);color:#1a1205;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn:hover{filter:brightness(1.12)}
+  /* New KPI unlock + term tooltips */
+  .unlock{background:#15302a;border:1px solid #2a5a4a;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;line-height:1.6;animation:fade .5s}
+  .unlock b{color:var(--green)}
+  .term{color:var(--teal);border-bottom:1px dashed var(--teal);cursor:help;position:relative}
+  .term:hover::after{content:attr(data-def);position:absolute;left:0;bottom:130%;background:#0a0e13;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;width:260px;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  /* Chapter interludes */
+  .interlude{text-align:center;padding:40px 26px}
+  .interlude .big{font-size:40px;margin-bottom:12px}
+  .interlude h2{margin-bottom:14px}
+  .interlude p{color:var(--muted);line-height:1.7;max-width:540px;margin:0 auto 22px;font-size:15px}
+  /* End */
+  .ending-title{font-size:26px;color:var(--accent);margin-bottom:12px}
+  .timeline{margin:18px 0}
+  .timeline .row{display:flex;gap:12px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--panel2)}
+  .timeline .ch{color:var(--teal);min-width:90px;text-transform:uppercase;font-size:11px;letter-spacing:1px;padding-top:2px}
+  .gameover{border-color:var(--red)}
+  .gameover h2{color:var(--red)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>THE FOUNDER'S <span>FORGE</span></h1>
+    <div class="chapter-pill" id="pill">Prologue</div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+// ================= TERM GLOSSARY =================
+const TERMS = {
+  "lead time":"Total time from receiving an order to delivering it. Customers buy speed as much as price.",
+  "rework":"Fixing defective parts after they're made. Pure waste — you pay twice to make the part once.",
+  "OEE":"Overall Equipment Effectiveness = Availability × Performance × Quality. The single best measure of how well a plant uses its machines. World-class is ~85%.",
+  "downtime":"Time a machine isn't producing — breakdowns, changeovers, waiting for material. Every minute is money lost.",
+  "takt time":"The rhythm of customer demand: available time ÷ units required. Produce faster and you build excess inventory; slower and you miss deliveries.",
+  "5S":"Sort, Set in order, Shine, Standardise, Sustain — a workplace organisation discipline. The foundation of every serious factory.",
+  "preventive maintenance":"Servicing machines on schedule before they break, instead of fixing them after. Trades small planned downtime for large unplanned downtime.",
+  "PPM":"Defective Parts Per Million shipped. Automotive customers expect under 50 PPM — that's 99.995% good parts.",
+  "PPAP":"Production Part Approval Process — the formal evidence package an automotive customer demands before you may ship a single production part.",
+  "poka-yoke":"Mistake-proofing: designing a process so errors are physically impossible (e.g., a fixture that won't accept a part backwards).",
+  "kaizen":"Continuous improvement in small daily steps, driven by the people doing the work — not just managers.",
+  "OTD":"On-Time Delivery: % of orders delivered on the promised date. In automotive, a missed delivery can stop a customer's entire line.",
+  "IATF 16949":"The global quality management standard for automotive suppliers. No certificate, no business.",
+  "changeover":"Time lost switching a machine from making one part to another. SMED techniques attack this waste.",
+  "bottleneck":"The slowest step in a process — it sets the output of the whole plant. An hour lost at the bottleneck is an hour lost forever.",
+  "working capital":"Cash tied up in inventory and unpaid customer invoices. Profitable companies die when this runs out."
+};
+function T(word, key){ return `<span class="term" data-def="${TERMS[key||word.toLowerCase()]}">${word}</span>`; }
+
+// ================= METRICS =================
+const ALL_METRICS = {
+  cash:      {name:"Cash",        color:"var(--accent)", max:100, fmt:v=>"₹"+v+"L"},
+  resolve:   {name:"Resolve",     color:"var(--purple)", max:100, fmt:v=>v},
+  reputation:{name:"Reputation",  color:"var(--blue)",   max:100, fmt:v=>v},
+  quality:   {name:"Quality",     color:"var(--green)",  max:100, fmt:v=>v+"%"},
+  otd:       {name:"On-Time Delivery", color:"var(--teal)", max:100, fmt:v=>v+"%"},
+  oee:       {name:"Plant OEE",   color:"var(--accent)", max:100, fmt:v=>v+"%"},
+  morale:    {name:"Team Morale", color:"var(--purple)", max:100, fmt:v=>v}
+};
+
+// ================= STORY DATA =================
+// Chapters → scenes. Each scene: story, choices[{label, outcome, fx{metric:delta}}].
+// "unlock": metrics introduced at chapter start, with a teaching note.
+const CHAPTERS = [
+{
+  id:"ch1", title:"Chapter 1 · The Leap", pill:"Chapter 1 — The Leap",
+  intro:{emoji:"🌧️", head:"The Last Straw",
+    text:"Seventeen years at Hexler Industries. Another reorg, another boss half your age, another \"strategic realignment\" of your ideas into someone else's slide deck. On the drive home through Pune traffic, you pass the old Kadam Engineering workshop — shutters down, FOR SALE sign rusting. Your grandfather was a toolmaker. Your hands remember things your job never asked of them. That night you tell your family: <em>\"I'm going to build something.\"</em>"},
+  unlock:{metrics:["cash","resolve","reputation"], note:"Your journey starts with three things: <b>Cash</b> (₹ lakhs — hit zero and the dream dies), <b>Resolve</b> (your personal fuel — burnout is real), and <b>Reputation</b> (the market's memory of you)."},
+  scenes:[
+  {
+    story:`The Kadam workshop costs ₹38 lakh — almost everything you have. Inside: two ancient lathes, a milling machine older than you, pigeons in the rafters, and forty years of oil soaked into the floor. The broker shrugs: <em>"Machines included. As-is."</em>`,
+    choices:[
+      {label:"Buy it outright. All in. No retreat.", outcome:"The keys are heavy in your palm. You're now a man with a workshop, no income, and a thudding heart. Your spouse says nothing at dinner, which says everything.", fx:{cash:-30, resolve:+12, reputation:+2}},
+      {label:"Negotiate a lease-to-own deal to preserve cash.", outcome:"Three weeks of haggling. The owner's son finally agrees: ₹60k/month, purchase option in 2 years. Slower, safer — but every month now has a meter running.", fx:{cash:-8, resolve:+5, reputation:0}},
+      {label:"Take a partner — your old colleague Vikram offers 50% of the money for 40% of the dream.", outcome:"The burden halves, and so does the ownership. Vikram is sharp with money but has opinions. Many opinions.", fx:{cash:-15, resolve:+3, reputation:+5}}
+    ]
+  },
+  {
+    story:`Week one. The big lathe coughs to life, runs four minutes, and dies with a smell of burnt insulation. Old Mr. Pawar, who worked here 30 years, appears at the gate: <em>"I heard someone bought Kadam's place. That lathe — I know her moods."</em> He wants ₹35,000 a month. You can barely pay yourself.`,
+    choices:[
+      {label:"Hire Pawar. Experience is cheaper than ignorance.", outcome:"In three days Pawar has the lathe purring and has taught you more about machine maintenance than any manual. Worth every rupee — if the rupees last.", fx:{cash:-7, resolve:+8, reputation:+4}},
+      {label:"Fix it yourself with YouTube and stubbornness.", outcome:"Two weeks, burnt fingers, one rewound motor. It runs — at 70% speed. You learned a lot. You also lost two weeks you didn't have.", fx:{cash:-3, resolve:-8, reputation:0}},
+      {label:"Scrap the old machines, lease one modern CNC instead.", outcome:"A gleaming CNC arrives. The EMI arrives faster. But your little shop can now hold tolerances the old lathes only dreamed of.", fx:{cash:-12, resolve:+4, reputation:+6}}
+    ]
+  },
+  {
+    story:`A month in, savings bleeding, your old employer calls — they'll give you contract drafting work, decent money, remote. It would fund the workshop... and consume the hours the workshop needs. Vikram-or-not, family-or-not, this is the question every founder meets: <em>do you keep one foot on the dock?</em>`,
+    choices:[
+      {label:"Refuse. The boats are burned. Full focus on the shop.", outcome:"Terrifying and clean. Every morning you're at the workshop by 7. Hunger, it turns out, is a scheduling tool.", fx:{cash:-5, resolve:+10, reputation:+3}},
+      {label:"Take the contract work nights & weekends to fund the dream.", outcome:"The money helps. But you're drafting flange drawings at midnight and machining at dawn. Something in your back has started making the same sound as the old lathe.", fx:{cash:+12, resolve:-12, reputation:0}},
+      {label:"Counter-offer: you'll do it, but as a paid pilot order for machined parts instead.", outcome:"Audacious. Your ex-boss laughs — then actually sends you a tiny order for jig components. Your first invoice with YOUR company name on it.", fx:{cash:+6, resolve:+8, reputation:+6}}
+    ]
+  }]
+},
+{
+  id:"ch2", title:"Chapter 2 · First Blood", pill:"Chapter 2 — The First Order",
+  intro:{emoji:"📦", head:"The Order That Changes Everything",
+    text:"Word travels in industrial estates. Deshmukh Pumps, a mid-size pump maker, needs 500 precision shaft sleeves — their regular supplier botched a batch. Their purchase manager looks around your shop, unimpressed: <em>\"You have three weeks. ₹2.4 lakh. Mess it up and everyone on this street will know.\"</em> This is it. Your first real order."},
+  unlock:{metrics:["quality","otd"], note:"Real customers bring real measures: <b>Quality</b> (% of parts that are right-first-time) and <b>On-Time Delivery</b>. In manufacturing, your word is a date and a dimension."},
+  scenes:[
+  {
+    story:`You study the drawing. Tolerance: ±0.02mm on the sleeve bore. Your old lathe can do it on a good day with Pawar's hands. The new question is process: rush all 500 through fast, or build a careful routine? Your ${T("lead time")} is three weeks — tight but doable… if nothing breaks.`,
+    choices:[
+      {label:"Run flat-out, 12-hour days, inspect at the end.", outcome:"Day 18: 500 sleeves done. Final inspection: 61 out of tolerance. Frantic " + T("rework") + " around the clock. You ship on day 21, exhausted, margins shredded — but on time.", fx:{cash:+8, resolve:-10, quality:-8, otd:+5}},
+      {label:"Set up first-piece inspection and check every 20th part.", outcome:"Slower start, but drift gets caught on day 6 — a worn insert, swapped in minutes, not discovered in disaster. 500 good sleeves, day 20. Pawar nods. From Pawar, that's a standing ovation.", fx:{cash:+10, resolve:+5, quality:+10, otd:+8}},
+      {label:"Outsource 200 sleeves to a neighbouring shop to be safe.", outcome:"Their 200 come back... variable. You quietly re-machine 70 of them. Lesson burned in: your name goes on everything that leaves your gate, no matter whose machine made it.", fx:{cash:+4, resolve:-4, quality:-5, otd:+10}}
+    ]
+  },
+  {
+    story:`Deshmukh's quality head visits unannounced, picks up a sleeve, mics it, says nothing for a long minute. <em>"Not bad. We have a bigger problem — 2,000 impeller hubs, monthly, ongoing. But your shop..."</em> he glances at the pigeon-stained rafters, <em>"...is not a factory."</em> An ongoing contract. Monthly volume. This is the door. It's also 4× your capacity.`,
+    choices:[
+      {label:"Say yes and figure it out. Buy a second-hand CNC on loan immediately.", outcome:"The loan officer becomes your most-called contact. The used CNC arrives with mystery vibrations. But monthly revenue now exists — a heartbeat instead of a pulse.", fx:{cash:-10, resolve:+6, reputation:+8, otd:-5}},
+      {label:"Negotiate a ramp-up: 500/month now, 2,000 by month six.", outcome:"The quality head almost smiles. \"A supplier who knows his limits. Rare.\" You get the contract with a growth path you can actually survive.", fx:{cash:+6, resolve:+4, reputation:+10, quality:+5}},
+      {label:"Decline the volume, propose instead to be their high-precision, low-volume specialist.", outcome:"A niche is a fortress. Margins are lovely. But you've capped your own ceiling, and a part of you knows it.", fx:{cash:+8, resolve:-3, reputation:+4, quality:+8}}
+    ]
+  },
+  {
+    story:`Growth means hands. Two candidates: Sunil, a brilliant machinist who lost his last job for arguing with everyone; and two fresh ITI graduates, eager and blank as new steel. Meanwhile your shop floor is becoming an archaeology site of chips, offcuts and unlabelled bins. Pawar mutters about ${T("5S")} — <em>"In Telco we cleaned the machine before we went home. A dirty floor hides every problem."</em>`,
+    choices:[
+      {label:"Hire Sunil. Skill now, personality later.", outcome:"Sunil's parts are jewellery. Sunil's arguments are war. Pawar threatens to retire twice in a month. Output rises; the air is thick.", fx:{quality:+10, otd:+5, resolve:-8}},
+      {label:"Hire the two ITI kids and train them Pawar's way.", outcome:"Slower for three months — then something clicks. They do it Pawar's way, every time, written on laminated cards. You've accidentally invented standard work.", fx:{cash:-5, quality:+6, otd:+3, resolve:+5, reputation:+3}},
+      {label:"Pause hiring; spend a weekend doing a full 5S blitz with Pawar first.", outcome:"Saturday: chaos out, shadow boards up, floor painted. Monday: tools found in seconds, a hidden coolant leak discovered. The shop feels — and works — like a different company.", fx:{quality:+8, otd:+6, resolve:+4, cash:-2}}
+    ]
+  },
+  {
+    story:`Disaster rehearsal. Deshmukh calls Thursday 6pm: <em>"Line-stop risk at our plant. We need 300 hubs by Monday morning — yes, we know it's double your weekly rate. Can you?"</em> Failing your anchor customer is unthinkable. So is shipping garbage.`,
+    choices:[
+      {label:"Promise it. Run the weekend, all hands, you on a machine too.", outcome:"Monday 5am, the tempo loaded. You deliver. Deshmukh's GM personally calls. Your team is wrecked but walking tall — these are the weekends companies are forged in.", fx:{otd:+12, reputation:+10, resolve:-10, morale:0}},
+      {label:"Promise 200 guaranteed-good by Monday, the rest Tuesday.", outcome:"Their planner reworks the schedule around your honest number. \"You're the only supplier who gives us numbers we can plan on.\" Trust compounds faster than interest.", fx:{otd:+8, reputation:+8, quality:+5, resolve:-3}},
+      {label:"Say yes, and quietly skip final inspection to make the count.", outcome:"You make Monday. Wednesday, their line catches 9 oversize bores — a formal complaint, an 8D demand, and a quality hold on YOUR parts. The shortcut becomes the longest road.", fx:{otd:+5, reputation:-15, quality:-12, cash:-6}}
+    ]
+  }]
+},
+{
+  id:"ch3", title:"Chapter 3 · The Factory", pill:"Chapter 3 — Scaling Up",
+  intro:{emoji:"🏭", head:"From Workshop to Plant",
+    text:"Three years in. You've moved to a 20,000 sq ft shed in Chakan MIDC. Six CNCs, eighteen people, Pawar as plant head, Sunil (mellowed, mostly) running tooling. Revenue ₹4 crore. But growth has brought a new enemy: <em>chaos at scale</em>. Machines idle mysteriously. Orders trip over each other. You're no longer the bottleneck-fixer — you ARE the bottleneck."},
+  unlock:{metrics:["oee","morale"], note:"At factory scale you live by <b>Plant OEE</b> — Overall Equipment Effectiveness, the product of how much your machines run, how fast, and how right. World-class is 85%; yours is 52%. And <b>Team Morale</b> — because machines don't improve themselves, people do."},
+  scenes:[
+  {
+    story:`Pawar's whiteboard tells the ugly truth: ${T("OEE")} at 52%. Breakdowns eat 11% of time, ${T("changeover","changeover")}s eat 9%, and waiting-for-material eats more. The #3 CNC — your ${T("bottleneck")} — broke down twice this month, mid-batch. Pawar wants a ${T("preventive maintenance")} program. Sunil wants a seventh machine. The bank would prefer you wanted neither.`,
+    choices:[
+      {label:"Buy the seventh machine. Capacity solves everything.", outcome:"The new CNC absorbs the load… and within months it idles like the rest, starved by the same scheduling chaos. You've automated the production of waiting. OEE: 51%.", fx:{cash:-15, oee:-1, morale:+3}},
+      {label:"No new machines: launch preventive maintenance + SMED changeover reduction.", outcome:"Three months of unglamorous discipline. Breakdowns halve. Changeovers drop from 40 to 14 minutes. OEE climbs to 63% — you found a hidden machine inside the machines you already own.", fx:{cash:-4, oee:+11, quality:+4, morale:+5}},
+      {label:"Hire a consultant to do a full lean assessment first.", outcome:"₹6 lakh and six weeks later: a 90-page deck telling you what Pawar said for free. But it does give the bank confidence, and one chart — your value-stream map — changes how you see everything.", fx:{cash:-6, oee:+4, reputation:+4}}
+    ]
+  },
+  {
+    story:`A fire at a competitor floods you with enquiries. Tempting volume — but your planning is a whiteboard and Pawar's memory. Orders are already colliding; expedites jump the queue daily, and every expedite makes three other orders late. Your ${T("OTD")} has slipped to 81%. The plant doesn't need more orders. It needs a drumbeat — production planned to ${T("takt time")}, not to whoever shouts loudest.`,
+    choices:[
+      {label:"Take every order. Revenue first, systems later.", outcome:"Two glorious, monstrous months. Then the pile-up: OTD craters to 68%, two new customers leave angrier than they arrived, and Deshmukh — loyal Deshmukh — issues a vendor warning.", fx:{cash:+15, otd:-13, reputation:-8, morale:-8}},
+      {label:"Take 40% of it, and implement a simple weekly planning rhythm with frozen schedules.", outcome:"Saying no to money hurts. But the plant finds a cadence: Monday plans, Friday reviews, no jumping the queue. OTD rebounds to 90%. Calm, it turns out, is a capability.", fx:{cash:+8, otd:+9, oee:+5, morale:+6}},
+      {label:"Take the volume but subcontract overflow to three small shops you'll quality-audit.", outcome:"You become what Deshmukh once was to you. One subcontractor is a gem, one is adequate, one teaches you why incoming inspection exists. A supplier network is born — clumsily.", fx:{cash:+10, quality:-6, otd:+3, reputation:+3}}
+    ]
+  },
+  {
+    story:`The strike that almost was. New shift timings, announced by notice board, land badly. Eighteen people are now forty, and most don't know you from the old workshop days. A worker named Kale becomes the voice: <em>"We're not machines you schedule."</em> Pawar, old-school, says hold firm. Your HR consultant (you have one now) says negotiate. Morale is the lowest it's ever been.`,
+    choices:[
+      {label:"Hold firm. The schedule is an operational necessity.", outcome:"You win the schedule and lose the room. Quiet resentment shows up where you can't see it — in care, in attention, in the small extra checks nobody is paid to do. Defects tick up.", fx:{morale:-12, quality:-6, oee:-3}},
+      {label:"Open the books: show the team why, then co-design shifts with them.", outcome:"You project the plant's costs on the canteen wall. Silence, then questions, then ideas — Kale himself proposes a rotation better than yours. The schedule lands. So does something bigger: trust.", fx:{morale:+14, oee:+4, resolve:+4}},
+      {label:"Offer a production bonus tied to output to sweeten the change.", outcome:"It works — too well. Output rises, but so do shortcuts; bonus chasing breeds quality drift. You learn that what you pay for is exactly what you get.", fx:{morale:+5, oee:+5, quality:-7, cash:-5}}
+    ]
+  },
+  {
+    story:`Kale, post-truce, is full of ideas. Pawar wants to formalise it: a ${T("kaizen")} program — small daily improvements from the floor itself. Sunil scoffs: <em>"Suggestion boxes are where ideas go to die."</em> Meanwhile a recurring defect — a chamfer missed on one part — keeps escaping. A fixture redesign could make the error physically impossible: a ${T("poka-yoke")}.`,
+    choices:[
+      {label:"Launch kaizen properly: weekly 30-min team huddles, ideas implemented within a week.", outcome:"Month one: trivia. Month three: a fixture idea from a 22-year-old operator saves 4 seconds per part — ₹3 lakh a year. The floor starts seeing the plant as theirs to improve.", fx:{oee:+7, morale:+8, quality:+5, cash:-2}},
+      {label:"Skip programs; just fix the chamfer with a poka-yoke fixture and move on.", outcome:"The fixture works — that defect never escapes again. A clean, surgical win. But improvement remains something YOU do to the plant, not something the plant does to itself.", fx:{quality:+8, oee:+2}},
+      {label:"Tie kaizen to cash rewards per idea.", outcome:"A flood of ideas — many recycled, some gamed, a few brilliant. The accountant is unhappy, Pawar is sceptical, but two genuinely great fixes emerge. Messy, like most real things.", fx:{oee:+4, morale:+4, cash:-5, quality:+3}}
+    ]
+  }]
+},
+{
+  id:"ch4", title:"Chapter 4 · The Big League", pill:"Chapter 4 — Automotive",
+  intro:{emoji:"🚗", head:"The Badge on the Gate",
+    text:"Year six. A scout from Mahendra Motors — yes, THE Mahendra — visits unannounced (they always do). They need a second source for gearbox synchroniser hubs. The prize: automotive volumes, multi-year visibility, a logo on your customer wall that changes every conversation. The price: a world where quality is measured in <em>defects per million</em>, audits are blood sport, and a late truck can stop a 2,000-car-a-day line."},
+  unlock:{metrics:[], note:"Welcome to automotive. Your <b>Quality</b> is now scored the hard way — think " + T("PPM") + " not percent — and " + T("OTD") + " means a truck at their dock at 6:40am, not \"this week\". Same metrics, far thinner air."},
+  scenes:[
+  {
+    story:`First hurdle: the ${T("PPAP")} — a documentation mountain proving your process can make their part, every time, forever. Control plans, capability studies, measurement system analysis. Sunil calls it bureaucracy. Pawar, who lived this at Telco, calls it religion. It will take 4 months and ₹25 lakh to do properly — or you could buy a "PPAP package" from a consultant who'll dress up your current process in the right paperwork.`,
+    choices:[
+      {label:"Do it properly: rebuild the process to be capable, then document the truth.", outcome:"Four brutal months. You discover your spindle alignment was marginal for years — nobody knew because nobody measured. The PPAP passes level 3 on first submission. Rare air.", fx:{cash:-20, quality:+12, reputation:+10, oee:+3}},
+      {label:"Buy the dressed-up paperwork. Get approved now, improve later.", outcome:"Approved on paper. Three months into production, their SQE audits the actual line, finds the gap between document and reality, and your rating turns amber. Trust, once amber, fades slowly.", fx:{cash:-8, reputation:-10, quality:-4}},
+      {label:"Negotiate a longer timeline with Mahendra, doing it properly but slower.", outcome:"Their program manager respects candour more than speed — second sources that implode help nobody. You get 7 months. The breathing room saves your team's sanity.", fx:{cash:-14, quality:+10, reputation:+6, morale:+4}}
+    ]
+  },
+  {
+    story:`Production begins. Week nine: Mahendra's incoming inspection flags 3 hubs from a lot of 5,000 — undersize spline. That's 600 ${T("PPM")} against a contract limit of 50. The formal 8D lands in your inbox like a court summons. Root cause hides somewhere between a tool-wear pattern and an operator who may have skipped a check. The plant holds its breath: how does the boss handle the first big failure?`,
+    choices:[
+      {label:"Find who skipped the check. Accountability must be visible.", outcome:"You find him — a good operator, exhausted from a double shift you approved. The firing chills the floor. Problems start getting hidden instead of reported, which is how small problems grow teeth.", fx:{morale:-12, quality:-5, reputation:+2}},
+      {label:"Blame the process, not the person: why COULD the check be skipped at all?", outcome:"The investigation becomes a masterclass. Outcome: a " + T("poka-yoke") + " gauge the part physically cannot bypass, and a tool-life tracking system. Mahendra's SQE writes in his report: 'supplier demonstrates mature quality culture.'", fx:{quality:+12, morale:+8, reputation:+8, cash:-4}},
+      {label:"Dispute the finding — 3 parts in 5,000 with their measurement uncertainty? Fight it.", outcome:"You win the technical argument and lose the relationship war. Nobody at Mahendra remembers the metrology debate; everybody remembers the supplier who argued instead of fixed.", fx:{reputation:-8, quality:0, resolve:-4}}
+    ]
+  },
+  {
+    story:`Scale-up demands a new plant. Two paths: a greenfield factory near the Mahendra plant in Nashik (₹18 crore, 2 years, designed right from day one), or acquiring Patil Auto Parts — a struggling competitor with a ready plant, an ${T("IATF 16949")} certificate, tired machines and 130 demoralised employees. The bank, for once, will fund either. Vikram (still 40%, still opinionated) wants the acquisition. Pawar wants greenfield. <em>"You can't un-bake a bad cake,"</em> he says.`,
+    choices:[
+      {label:"Greenfield. Design the perfect plant: flow, takt, daylight, no legacy.", outcome:"Two years of construction stress and capex sweats. But the plant flows like water — single-piece flow, 78% OEE within a year of launch. Visitors start asking for tours. Pawar cries at the inauguration; claims it's dust.", fx:{cash:-25, oee:+12, quality:+6, morale:+6}},
+      {label:"Acquire Patil. Speed matters more than perfection.", outcome:"Day one you inherit revenue, certification — and culture debt. A year of hard integration; 30 people leave, others bloom under leadership they'd been starved of. Faster, uglier, cheaper. Probably right. You'll never be sure.", fx:{cash:-15, oee:+4, morale:-5, reputation:+6, otd:+5}},
+      {label:"Neither: max out the current plant with a third shift and flow redesign first.", outcome:"You squeeze 40% more from the same walls — flow re-layout, " + T("takt time") + " balancing, a third shift. Cheapest capacity in the world is the capacity hiding in your own plant. But the ceiling is now visibly close.", fx:{cash:-5, oee:+9, otd:+4, morale:-3}}
+    ]
+  },
+  {
+    story:`The EV question. Mahendra announces 30% EV by 2030. Synchroniser hubs — your bread and butter — don't exist in an EV gearbox. Your engineers identify adjacent opportunities: e-axle housings, motor shafts, battery enclosure frames. All need investment, new competencies, new machines. Sunil, now your head of engineering, puts it plainly: <em>"We can be early, on time, or dead."</em>`,
+    choices:[
+      {label:"Pivot hard: dedicate a full line and R&D budget to EV components now.", outcome:"You're early — painfully early. The line runs at 30% load for 18 months. Then the orders come, and you're one of three qualified suppliers in the country while competitors are still making business cases.", fx:{cash:-18, reputation:+12, oee:-5, resolve:+5}},
+      {label:"Hedge: win one EV development order and learn on the customer's money.", outcome:"A co-development contract for motor shafts — modest revenue, priceless learning. You build EV competence with a customer pulling you forward instead of capital pushing you blind.", fx:{cash:-5, reputation:+8, quality:+4}},
+      {label:"Milk the ICE business; gearboxes will outlive the hype.", outcome:"Margins stay fat for three more years and the cash is real. But two rivals announce EV lines, and at the next vendor meet, Mahendra's purchasing head asks about your 'future readiness roadmap'. You don't have one.", fx:{cash:+15, reputation:-8, resolve:-5}}
+    ]
+  }]
+},
+{
+  id:"ch5", title:"Chapter 5 · The World", pill:"Chapter 5 — Going Global",
+  intro:{emoji:"🌍", head:"Beyond the Border",
+    text:"Year eleven. Three plants, 900 people, ₹220 crore revenue, your e-axle housings in two EV platforms. At a Hannover trade fair, a German Tier-1 — Brandt Antriebstechnik — stops at your booth and stays for an hour. They want a low-cost, high-quality sourcing base outside China. <em>\"India is interesting,\"</em> says their VP, <em>\"but Indian suppliers promise everything and audit poorly. Convince us you're different.\"</em>"},
+  unlock:{metrics:[], note:"The global game is your whole scorecard at once: " + T("OEE") + " proves competitiveness, " + T("PPM") + "-level quality earns entry, " + T("OTD") + " across oceans keeps it, and culture — <b>Morale</b> — is what auditors smell in the first ten minutes."},
+  scenes:[
+  {
+    story:`Brandt's audit is unlike anything you've faced: two days, three auditors, your actual shop floor — not your conference room. They interview operators alone. They ask a 23-year-old on line 4 what she does if she finds a suspect part. They time a ${T("changeover")} with their own stopwatch. The week before, Sunil offers to "prepare" the floor — banners, fresh paint, briefing cards for operators.`,
+    choices:[
+      {label:"No theatre. They see the plant exactly as it runs on a Tuesday.", outcome:"The auditors notice — they always notice. The young operator answers the suspect-part question from genuine habit, not a script. Score: 89/100. 'The most honest plant we have audited in Asia,' the report says.", fx:{reputation:+14, morale:+8}},
+      {label:"Prepare thoroughly — paint, banners, scripted answers. First impressions count.", outcome:"The floor gleams. Then an auditor asks an operator a follow-up question off-script, and the rehearsed answer collapses in real time. 71/100: 'evidence of audit preparation.' In German, that is not a compliment.", fx:{reputation:-6, morale:-4, cash:-3}},
+      {label:"Postpone the audit six months and fix the real gaps the mock-audit found first.", outcome:"Brandt respects the candour but parks you in their pipeline. When the audit finally happens you score 92 — yet you watch a Thai competitor take the first program while you were perfecting. Time has a price too.", fx:{quality:+8, reputation:+4, cash:-6}}
+    ]
+  },
+  {
+    story:`The contract comes — e-axle housings for a European EV platform, shipped to Hungary, 11,000 km away. ${T("OTD")} now involves the Suez canal's moods, euro exposure, and a customs officer's lunch schedule. One late vessel could idle their line at €40,000 an hour. Your supply chain head presents options for the ocean of risk between your dock and theirs.`,
+    choices:[
+      {label:"Air-freight buffer policy: ship by sea, but air-freight at the first sign of delay, whatever the cost.", outcome:"Twice in year one you burn ₹40 lakh on air freight. Brandt never sees a late part and tells other divisions about you. Expensive insurance — but reputation in Europe is bought exactly once.", fx:{cash:-10, otd:+12, reputation:+10}},
+      {label:"Build a small warehouse buffer in Hungary — 3 weeks of stock near their plant.", outcome:"Working capital takes a permanent hit, but deliveries become boring — the highest compliment in logistics. The warehouse later becomes your European staging point. Accidental strategy is still strategy.", fx:{cash:-12, otd:+10, oee:+2}},
+      {label:"Negotiate Incoterms so risk transfers at the Indian port. Their problem after that.", outcome:"Legally elegant. Commercially naive. The first delayed vessel is contractually 'not your fault' and relationally entirely your fault. Brandt's planner doesn't read Incoterms; she reads the empty rack.", fx:{cash:+4, otd:-8, reputation:-8}}
+    ]
+  },
+  {
+    story:`The endgame question. You're 54. Revenue ₹600 crore. A global private equity fund offers to buy 60% at a valuation that would make your grandfather's toolbox worth its weight in gold. Vikram wants to sell. Pawar retired last year but still visits Fridays; he says nothing, which as always says everything. Your daughter, an engineer, has quietly started attending your management reviews. The fund's partner asks: <em>"What do you want your name to mean?"</em>`,
+    choices:[
+      {label:"Sell the majority. Take the wealth, keep a board seat, exhale.", outcome:"The wire transfer has more zeros than your first year's revenue. The fund installs systems, scale — and a CEO who's never held a micrometer. The company grows. Something else doesn't. On Fridays, you and Pawar drink tea and don't talk about it.", fx:{cash:+30, resolve:-5, morale:-6}},
+      {label:"Refuse. Build a 100-year company; begin grooming your daughter and the next generation of leaders.", outcome:"Slower wealth, deeper roots. Your daughter rotates through every department — starting, at her own insistence, on the shop floor at the old Chakan plant. The succession plan IS the strategy now.", fx:{resolve:+10, morale:+10, reputation:+8}},
+      {label:"Counter: take their money as a minority partner to fund a Mexico plant for the Americas.", outcome:"The fund blinks, then agrees — good assets negotiate. Ground breaks in Monterrey within a year. Three continents. The boy who bought a pigeon-filled workshop now checks OEE dashboards across nine time zones before breakfast.", fx:{cash:+15, reputation:+10, oee:+3, resolve:+3}}
+    ]
+  }]
+}];
+
+// ================= ENGINE =================
+let G = {
+  ch:0, sc:-1, // -1 = chapter intro
+  metrics:{cash:40, resolve:60, reputation:20},
+  active:["cash","resolve","reputation"],
+  log:[]
+};
+
+const $=id=>document.getElementById(id);
+const stage=$("stage");
+
+function clamp(v){return Math.max(0,Math.min(100,v));}
+
+function renderKPIs(deltas={}){
+  $("kpis").innerHTML = G.active.map(k=>{
+    const m=ALL_METRICS[k], v=G.metrics[k], d=deltas[k]||0;
+    const dh = d?`<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>`:"";
+    return `<div class="kpi"><div class="label">${m.name}</div><div class="val">${m.fmt(v)}${dh}</div><div class="bar"><i style="width:${v}%;background:${m.color}"></i></div></div>`;
+  }).join("");
+}
+
+function showChapterIntro(){
+  const ch=CHAPTERS[G.ch];
+  $("pill").textContent=ch.pill;
+  let unlockHtml="";
+  if(ch.unlock){
+    ch.unlock.metrics.forEach(k=>{
+      if(!G.active.includes(k)){
+        G.active.push(k);
+        G.metrics[k] = k==="oee"?52 : k==="quality"?70 : k==="otd"?75 : k==="morale"?65 : 50;
+      }
+    });
+    unlockHtml=`<div class="unlock">📊 ${ch.unlock.note}</div>`;
+  }
+  renderKPIs();
+  stage.innerHTML=`<div class="card interlude">
+    <div class="big">${ch.intro.emoji}</div>
+    <div class="chapter-title">${ch.title}</div>
+    <h2>${ch.intro.head}</h2>
+    <p>${ch.intro.text}</p>
+    ${unlockHtml}
+    <button class="btn" onclick="nextScene()">Continue →</button>
+  </div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextScene(){
+  G.sc++;
+  const ch=CHAPTERS[G.ch];
+  if(G.sc>=ch.scenes.length){
+    G.ch++; G.sc=-1;
+    if(G.ch>=CHAPTERS.length){ ending(); return; }
+    showChapterIntro(); return;
+  }
+  const s=ch.scenes[G.sc];
+  renderKPIs();
+  stage.innerHTML=`<div class="card">
+    <div class="chapter-title">${ch.title} · Scene ${G.sc+1}/${ch.scenes.length}</div>
+    <p class="story">${s.story}</p>
+    <div class="choices">${s.choices.map((c,i)=>`<button class="choice" onclick="pick(${i})">${c.label}</button>`).join("")}</div>
+  </div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function pick(i){
+  const ch=CHAPTERS[G.ch], s=ch.scenes[G.sc], c=s.choices[i];
+  const deltas={};
+  for(const k in c.fx){
+    if(!G.active.includes(k)) continue;
+    const jitter = Math.floor(Math.random()*3)-1;
+    const d=c.fx[k]+ (Math.abs(c.fx[k])>2? jitter:0);
+    deltas[k]=d;
+    G.metrics[k]=clamp(G.metrics[k]+d);
+  }
+  G.log.push({chapter:ch.title, choice:c.label});
+  renderKPIs(deltas);
+
+  if(G.metrics.cash<=0){ gameOver("cash", c); return; }
+  if(G.metrics.resolve<=0){ gameOver("resolve", c); return; }
+
+  const fxHtml = Object.entries(deltas).map(([k,d])=>
+    `<span class="${d>=0?'up':'down'}">${ALL_METRICS[k].name} ${d>=0?'+':''}${d}</span>`).join("");
+  stage.innerHTML=`<div class="card outcome">
+    <div class="chapter-title">${ch.title} · Outcome</div>
+    <p class="story">${c.outcome}</p>
+    <div class="effects">${fxHtml}</div>
+    <button class="btn" onclick="nextScene()">Continue →</button>
+  </div>`;
+}
+
+function gameOver(why, c){
+  const msg = why==="cash"
+    ? "The account hits zero. The bank's letter is polite and final. You sell the machines to a man who haggles over the lathe Pawar loved. Some dreams end not with a bang but with an auction."
+    : "One morning you simply cannot get out of the car in the workshop parking lot. The body keeps score, and yours has called the debt. The shutters come down — not for lack of money, but of fire.";
+  stage.innerHTML=`<div class="card gameover">
+    <h2>■ The Story Ends Here</h2>
+    <p class="story">${c.outcome}</p>
+    <p class="story"><em>${msg}</em></p>
+    <p class="story">But founders are made of restarts.</p>
+    <button class="btn" onclick="location.reload()">Begin Again</button>
+  </div>`;
+}
+
+function ending(){
+  $("pill").textContent="Epilogue";
+  renderKPIs();
+  const m=G.metrics;
+  const avg=Math.round(G.active.reduce((a,k)=>a+m[k],0)/G.active.length);
+  let title,text;
+  if(avg>=75){ title="The Legend of the Forge";
+    text="Business schools write the case study. The pigeon-filled workshop is preserved at the Nashik plant entrance — shutters, oil stains and all — with a plaque: <em>\"Every great factory was once one person's unreasonable decision.\"</em> Your OEE dashboards glow across continents, but on Friday evenings you still walk a shop floor, picking up a part, feeling the finish, the way Pawar taught you."; }
+  else if(avg>=58){ title="The Builder";
+    text="Not every battle won, but the war — decisively. A global manufacturer stands where a rusty shutter once hung. People who joined as ITI kids now run plants. Whatever the exit numbers say, the truest balance sheet is this: a few thousand families, three towns, and one industry are different because you got fed up at the right moment."; }
+  else { title="The Survivor";
+    text="It was harder than the books said and lonelier than anyone warned. The company stands — scarred, real, yours. Some KPIs never hit world-class; some decisions still visit you at 3am. But you built a thing that exists, that employs, that ships. Most people never find out what they'd do. You did."; }
+  stage.innerHTML=`<div class="card">
+    <div class="chapter-title">Epilogue · Score ${avg}/100</div>
+    <div class="ending-title">${title}</div>
+    <p class="story">${text}</p>
+    <h2 style="margin-top:18px">Your Journey</h2>
+    <div class="timeline">${G.log.map(l=>`<div class="row"><span class="ch">${l.chapter.split("·")[0]}</span><span>${l.choice}</span></div>`).join("")}</div>
+    <button class="btn" onclick="location.reload()">Live It Again</button>
+  </div>`;
+}
+
+renderKPIs();
+showChapterIntro();
+</script>
+</body>
+</html>

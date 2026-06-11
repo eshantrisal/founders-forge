@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Founder's Forge — A Manufacturing Story</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161d27; --panel2:#1f2937; --border:#2c3a4d;
+    --text:#e9eef4; --muted:#8b99a9; --accent:#f0a132; --green:#3ecf8e;
+    --red:#ef5e5e; --blue:#5aa6f0; --purple:#a98df0; --teal:#46c8c8; --amber:#e8c547;
+    --sketch:#9fb0c0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:20px}
+  .app{width:100%;max-width:800px}
+  header{text-align:center;margin-bottom:16px}
+  h1{font-size:26px;letter-spacing:1px}
+  h1 span{color:var(--accent)}
+  .chapter-pill{display:inline-block;background:var(--panel);border:1px solid var(--border);padding:5px 16px;border-radius:20px;font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:1px;text-transform:uppercase}
+
+  /* Founder KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 12px;animation:fade .5s}
+  .kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;white-space:nowrap}
+  .kpi .val{font-size:17px;font-weight:600}
+  .bar{height:5px;background:var(--panel2);border-radius:3px;margin-top:6px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
+  .delta{font-size:11px;margin-left:5px}
+  .up{color:var(--green)} .down{color:var(--red)}
+
+  /* SQDCM board */
+  .sqdcm{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;animation:fade .6s}
+  .sqdcm .board-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .tile{border-radius:10px;padding:10px 6px;text-align:center;border:1px solid var(--border);background:var(--panel2);transition:all .4s}
+  .tile .letter{font-size:22px;font-weight:800;line-height:1}
+  .tile .tname{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:3px}
+  .tile .tval{font-size:13px;font-weight:600;margin-top:4px}
+  .tile.green{border-color:#2a5a4a;background:#13261f}.tile.green .letter{color:var(--green)}
+  .tile.amber{border-color:#5a512a;background:#262213}.tile.amber .letter{color:var(--amber)}
+  .tile.red{border-color:#5a2a2a;background:#261313}.tile.red .letter{color:var(--red)}
+  .tile.locked{opacity:.32}.tile.locked .letter{color:var(--muted)}
+  .tile .flash{animation:pulse .8s}
+  @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+  /* Cards & art */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:0;margin-bottom:16px;animation:fade .45s;overflow:hidden}
+  .card .inner{padding:24px 26px}
+  .art{width:100%;display:block;background:linear-gradient(180deg,#121a24,#161d27);border-bottom:1px solid var(--border)}
+  .card h2{font-size:18px;margin-bottom:12px;color:var(--accent)}
+  .chapter-title{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:8px}
+  .story{font-size:15px;line-height:1.75;margin-bottom:18px}
+  .story em{color:var(--muted)}
+  .choices{display:grid;gap:10px}
+  .choice{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font-size:14px;line-height:1.5;transition:border-color .15s,transform .15s;font-family:inherit}
+  .choice:hover{border-color:var(--accent);transform:translateX(4px)}
+  .effects{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;font-size:13px}
+  .btn{background:var(--accent);color:#1a1205;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn:hover{filter:brightness(1.12)}
+
+  /* Forge fact */
+  .fact{background:#101b2a;border:1px solid #234;border-left:3px solid var(--blue);border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:13px;line-height:1.65}
+  .fact b{color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:4px}
+
+  /* unlock + terms */
+  .unlock{background:#15302a;border:1px solid #2a5a4a;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-size:13px;line-height:1.6}
+  .unlock b{color:var(--green)}
+  .term{color:var(--teal);border-bottom:1px dashed var(--teal);cursor:help;position:relative}
+  .term:hover::after{content:attr(data-def);position:absolute;left:0;bottom:130%;background:#0a0e13;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;width:260px;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
+  /* Dramatic chapter opening */
+  .opening{position:relative;text-align:center;padding:0}
+  .opening .art{border-bottom:1px solid var(--border)}
+  .opening .inner{padding:30px 30px 36px}
+  .opening .chnum{font-size:12px;letter-spacing:6px;color:var(--accent);text-transform:uppercase;animation:slideIn 1s}
+  .opening .chname{font-size:34px;font-weight:800;letter-spacing:2px;margin:8px 0 4px;animation:slideIn 1.2s}
+  .opening .year{font-size:13px;color:var(--muted);letter-spacing:3px;margin-bottom:18px;animation:slideIn 1.4s}
+  .opening .hook{font-size:17px;font-style:italic;color:var(--amber);line-height:1.6;max-width:560px;margin:0 auto 18px;animation:slideIn 1.6s}
+  .opening p.body{color:var(--muted);line-height:1.75;max-width:580px;margin:0 auto 22px;font-size:15px;text-align:left;animation:slideIn 1.8s}
+  @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+  /* Onboarding */
+  .ob label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 6px}
+  .ob input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none}
+  .ob input[type=text]:focus{border-color:var(--accent)}
+  .optrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+  .opt{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;text-align:center;color:var(--text);font-family:inherit;line-height:1.4}
+  .opt.sel{border-color:var(--accent);background:#2a2113;color:var(--accent)}
+  .diff-badge{display:inline-block;border-radius:20px;padding:6px 18px;font-size:13px;font-weight:700;letter-spacing:1px;margin:8px 0}
+  .diff-badge.easy{background:#13261f;color:var(--green);border:1px solid #2a5a4a}
+  .diff-badge.normal{background:#262213;color:var(--amber);border:1px solid #5a512a}
+  .diff-badge.hard{background:#261313;color:var(--red);border:1px solid #5a2a2a}
+  /* Chapter progress report */
+  .report .rowm{display:grid;grid-template-columns:120px 1fr 70px;gap:10px;align-items:center;font-size:13px;padding:8px 0;border-bottom:1px solid var(--panel2)}
+  .report .mname{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:1px}
+  .dual{position:relative;height:8px;background:var(--panel2);border-radius:4px;overflow:hidden}
+  .dual .was{position:absolute;height:100%;background:#3a4a5d;border-radius:4px}
+  .dual .now{position:absolute;height:100%;border-radius:4px;transition:width .8s ease}
+  .verdict{font-style:italic;color:var(--amber);margin:14px 0 18px;line-height:1.6}
+  .ending-title{font-size:26px;color:var(--accent);margin-bottom:12px}
+  .timeline{margin:18px 0}
+  .timeline .row{display:flex;gap:12px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--panel2)}
+  .timeline .ch{color:var(--teal);min-width:90px;text-transform:uppercase;font-size:11px;letter-spacing:1px;padding-top:2px}
+  .gameover .inner h2{color:var(--red)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media(max-width:560px){.tiles{gap:5px}.tile .tname{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>THE FOUNDER'S <span>FORGE</span></h1>
+    <div class="chapter-pill" id="pill">Prologue</div>
+  </header>
+  <div class="kpis" id="kpis"></div>
+  <div id="sqdcmWrap"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+// ============ SKETCH ART LIBRARY (hand-drawn style SVGs) ============
+const S = 'stroke="#9fb0c0" stroke-width="2" fill="none" stroke-linecap="round"';
+const SA = 'stroke="#f0a132" stroke-width="2" fill="none" stroke-linecap="round"';
+const SD = 'stroke="#5a6a7a" stroke-width="1.5" fill="none" stroke-linecap="round"';
+function svg(inner){return `<svg class="art" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;}
+
+const ART = {
+rain_drive: svg(`
+  <path d="M30 110 Q200 100 380 110" ${SD}/>
+  <rect x="60" y="40" width="34" height="62" ${SD} transform="rotate(-1 77 71)"/>
+  <rect x="100" y="25" width="40" height="77" ${SD}/>
+  <rect x="146" y="50" width="30" height="52" ${SD} transform="rotate(1 161 76)"/>
+  <path d="M250 105 q5 -18 28 -18 q8 -12 30 -12 q22 0 28 12 q22 2 24 18 z" ${S}/>
+  <circle cx="270" cy="107" r="7" ${S}/><circle cx="330" cy="107" r="7" ${S}/>
+  <path d="M70 15 l-6 14 M110 8 l-6 14 M160 20 l-6 14 M210 10 l-6 14 M250 22 l-6 14 M310 12 l-6 14 M350 25 l-6 14 M30 30 l-6 14" ${SD}/>
+  <path d="M196 60 l18 0 m-18 8 l12 0" ${SA}/>
+`),
+workshop_gate: svg(`
+  <path d="M50 120 L50 50 L200 25 L350 50 L350 120" ${S}/>
+  <path d="M90 120 L90 65 L310 65 L310 120" ${S}/>
+  <path d="M90 75 h220 M90 87 h220 M90 99 h220 M90 111 h220" ${SD}/>
+  <rect x="240" y="35" width="70" height="22" ${SA} transform="rotate(-3 275 46)"/>
+  <text x="248" y="51" fill="#f0a132" font-size="11" font-family="monospace" transform="rotate(-3 275 46)">FOR SALE</text>
+  <path d="M140 40 q4 -8 10 -2 q6 6 -2 9" ${SD}/>
+  <path d="M30 120 h340" ${SD}/>
+`),
+old_lathe: svg(`
+  <rect x="80" y="70" width="240" height="35" rx="4" ${S}/>
+  <rect x="100" y="50" width="45" height="22" ${S}/>
+  <circle cx="160" cy="61" r="11" ${S}/><circle cx="160" cy="61" r="4" ${SA}/>
+  <path d="M171 61 h60" ${SA}/>
+  <rect x="231" y="52" width="26" height="18" ${S}/>
+  <path d="M95 105 v18 M305 105 v18" ${S}/>
+  <path d="M120 38 q3 -10 -2 -16 M132 40 q5 -8 1 -18" ${SD}/>
+  <path d="M255 30 l8 -6 6 8 -8 6z" ${SD}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+moonlight: svg(`
+  <circle cx="330" cy="35" r="16" ${SD}/><circle cx="324" cy="30" r="14" fill="#0d1117" stroke="none"/>
+  <rect x="70" y="75" width="150" height="8" ${S}/>
+  <path d="M85 83 v35 M205 83 v35" ${S}/>
+  <path d="M110 75 v-20 q0 -10 12 -10 q12 0 12 10" ${SA}/>
+  <path d="M122 58 l14 16 h-28 z" ${SA}/>
+  <rect x="150" y="60" width="40" height="15" ${SD} transform="rotate(-4 170 67)"/>
+  <circle cx="260" cy="60" r="14" ${S}/><path d="M260 52 v8 l6 4" ${S}/>
+  <circle cx="300" cy="78" r="10" ${SD}/><path d="M300 72 v6 l4 3" ${SD}/>
+  <path d="M40 120 h320" ${SD}/>
+`),
+first_order: svg(`
+  <rect x="90" y="30" width="130" height="90" ${S} transform="rotate(-2 155 75)"/>
+  <circle cx="155" cy="62" r="20" ${SD}/><path d="M155 42 v40 M135 62 h40" ${SD}/>
+  <path d="M100 95 h45 m-45 10 h60" ${SD}/>
+  <path d="M250 90 q20 -25 55 -12" ${SA}/>
+  <path d="M250 95 h60 l-6 18 h-48 z" ${S}/>
+  <path d="M262 95 v18 M286 95 v18" ${SD}/>
+  <text x="240" y="50" fill="#9fb0c0" font-size="11" font-family="monospace">±0.02mm</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+inspection: svg(`
+  <path d="M120 70 a30 30 0 1 1 18 28" ${S}/>
+  <path d="M138 98 l30 24" ${S}/>
+  <circle cx="150" cy="70" r="6" ${SA}/>
+  <rect x="230" y="55" width="80" height="26" rx="13" ${S}/>
+  <circle cx="244" cy="68" r="7" ${SD}/><circle cx="296" cy="68" r="7" ${SD}/>
+  <path d="M230 100 l8 8 14 -16" ${SA}/>
+  <path d="M270 100 l8 8 14 -16" ${SA}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+visitor: svg(`
+  <circle cx="140" cy="45" r="12" ${S}/><path d="M140 57 v35 M140 65 l-18 14 M140 65 l18 14 M140 92 l-12 26 M140 92 l12 26" ${S}/>
+  <circle cx="240" cy="45" r="12" ${S}/><path d="M228 38 q12 -10 24 0" ${SA}/>
+  <path d="M240 57 v35 M240 65 l-18 14 M240 65 l20 10 M240 92 l-12 26 M240 92 l12 26" ${S}/>
+  <rect x="258" y="70" width="22" height="16" ${SD}/>
+  <path d="M158 79 h64" ${SD} stroke-dasharray="4 4"/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+hiring: svg(`
+  <circle cx="110" cy="50" r="11" ${S}/><path d="M110 61 v30 M110 68 l-14 12 M110 68 l14 12 M110 91 l-10 24 M110 91 l10 24" ${S}/>
+  <circle cx="200" cy="50" r="11" ${SA}/><path d="M200 61 v30 M200 68 l-14 12 M200 68 l14 12 M200 91 l-10 24 M200 91 l10 24" ${SA}/>
+  <circle cx="290" cy="50" r="11" ${S}/><path d="M290 61 v30 M290 68 l-14 12 M290 68 l14 12 M290 91 l-10 24 M290 91 l10 24" ${S}/>
+  <path d="M95 28 q15 -12 30 0 M275 28 q15 -12 30 0" ${SD}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+rush: svg(`
+  <circle cx="90" cy="55" r="22" ${S}/><path d="M90 40 v15 l10 7" ${SA}/>
+  <path d="M70 30 l-6 -8 M110 30 l6 -8" ${SD}/>
+  <rect x="170" y="70" width="28" height="22" ${S}/><rect x="202" y="70" width="28" height="22" ${S}/><rect x="186" y="46" width="28" height="22" ${S}/>
+  <path d="M270 92 h60 v-22 h-38 l-10 -14 h-12 z" ${S}/>
+  <circle cx="284" cy="96" r="7" ${S}/><circle cx="318" cy="96" r="7" ${S}/>
+  <path d="M250 70 h12 m-18 10 h12 m-6 10 h12" ${SA}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+factory: svg(`
+  <path d="M40 118 V70 l45 -20 v20 l45 -20 v20 l45 -20 v68" ${S}/>
+  <path d="M175 118 V60 h185 v58" ${S}/>
+  <rect x="195" y="80" width="30" height="20" ${SD}/><rect x="240" y="80" width="30" height="20" ${SD}/><rect x="285" y="80" width="30" height="20" ${SD}/>
+  <rect x="320" y="40" width="14" height="20" ${S}/>
+  <path d="M324 32 q4 -8 -1 -12 M331 34 q5 -7 1 -14" ${SD}/>
+  <path d="M55 90 h18 m-18 12 h18 M100 90 h18 m-18 12 h18" ${SD}/>
+  <path d="M20 120 h360" ${SD}/>
+`),
+whiteboard: svg(`
+  <rect x="110" y="28" width="180" height="80" ${S}/>
+  <path d="M150 108 l-14 22 M250 108 l14 22" ${S}/>
+  <path d="M125 92 l30 -18 25 8 30 -28 30 6" ${SA}/>
+  <text x="122" y="45" fill="#9fb0c0" font-size="11" font-family="monospace">OEE 52%</text>
+  <path d="M250 45 h28 m-28 9 h20" ${SD}/>
+  <circle cx="330" cy="55" r="3" fill="#ef5e5e" stroke="none"/><circle cx="330" cy="68" r="3" fill="#e8c547" stroke="none"/><circle cx="330" cy="81" r="3" fill="#3ecf8e" stroke="none"/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+canteen: svg(`
+  <rect x="60" y="35" width="110" height="65" ${S}/>
+  <path d="M178 50 L230 30 m-52 35 L230 90" ${SD} stroke-dasharray="3 4"/>
+  <path d="M70 55 l20 -10 15 6 20 -16 25 4" ${SA}/>
+  <circle cx="250" cy="70" r="9" ${S}/><circle cx="280" cy="74" r="9" ${S}/><circle cx="310" cy="70" r="9" ${S}/><circle cx="265" cy="95" r="9" ${S}/><circle cx="295" cy="97" r="9" ${S}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+kaizen: svg(`
+  <circle cx="150" cy="60" r="24" ${SA}/>
+  <path d="M150 36 v-10 M150 94 v-10 M126 60 h-10 M184 60 h-10 M133 43 l-7 -7 M174 77 l-7 -7 M167 43 l7 -7 M133 77 l-7 7" ${SA}/>
+  <path d="M142 60 q8 -14 16 0 q-8 4 -16 0 M146 72 h8" ${S}/>
+  <circle cx="260" cy="62" r="22" ${S}/>
+  <path d="M260 40 l5 8 h-10 z M260 84 l5 -8 h-10 z M238 62 l8 -5 v10 z M282 62 l-8 -5 v10 z" ${S}/>
+  <path d="M200 60 h26" ${SD} stroke-dasharray="4 4"/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+safety: svg(`
+  <path d="M150 50 q0 -22 28 -22 q28 0 28 22 l4 14 h-64 z" ${SA}/>
+  <path d="M178 28 v-8" ${SA}/>
+  <path d="M250 95 l28 -50 28 50 z" ${S}/>
+  <path d="M278 62 v16 m0 7 v3" ${S}/>
+  <path d="M100 95 h200" ${SD}/>
+  <path d="M120 80 l10 -18 10 18" ${SD}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+automotive: svg(`
+  <path d="M90 95 q8 -24 40 -26 q14 -16 44 -16 q32 0 42 16 q34 2 42 26 z" ${S}/>
+  <circle cx="135" cy="99" r="11" ${S}/><circle cx="245" cy="99" r="11" ${S}/>
+  <path d="M150 70 h60" ${SD}/>
+  <circle cx="320" cy="55" r="20" ${SA}/>
+  <path d="M320 35 l4 7 h-8z M320 75 l4 -7 h-8z M300 55 l7 -4 v8z M340 55 l-7 -4 v8z" ${SA}/>
+  <path d="M40 118 h320" ${SD}/>
+`),
+ppap: svg(`
+  <rect x="120" y="40" width="80" height="75" ${S} transform="rotate(-3 160 77)"/>
+  <rect x="150" y="32" width="80" height="80" ${S}/>
+  <path d="M160 50 h60 m-60 12 h60 m-60 12 h44 m-44 12 h52" ${SD}/>
+  <circle cx="270" cy="90" r="18" ${SA}/>
+  <path d="M262 90 l6 7 11 -13" ${SA}/>
+  <text x="252" y="50" fill="#9fb0c0" font-size="10" font-family="monospace">PPAP L3</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+eightd: svg(`
+  <circle cx="170" cy="62" r="26" ${S}/>
+  <path d="M189 81 l28 26" ${S}/>
+  <rect x="158" y="54" width="24" height="14" rx="7" ${SA}/>
+  <path d="M250 50 h70 m-70 14 h54 m-54 14 h62" ${SD}/>
+  <text x="250" y="40" fill="#ef5e5e" font-size="11" font-family="monospace">8D REPORT</text>
+  <path d="M40 123 h320" ${SD}/>
+`),
+plant_choice: svg(`
+  <path d="M70 115 V75 l35 -16 v16 l35 -16 v52" ${S}/>
+  <path d="M230 115 V60 h110 v55" ${SA}/>
+  <path d="M250 60 v-25 h8 m30 25 v-35 l30 12" ${SA}/>
+  <path d="M285 25 h40 m-40 0 l-12 35" ${SD}/>
+  <path d="M180 90 h30 m-8 -8 l8 8 -8 8" ${SD}/>
+  <path d="M40 120 h330" ${SD}/>
+`),
+ev: svg(`
+  <path d="M100 95 q8 -24 40 -26 q14 -16 44 -16 q32 0 42 16 q34 2 42 26 z" ${S}/>
+  <circle cx="145" cy="99" r="11" ${S}/><circle cx="255" cy="99" r="11" ${S}/>
+  <path d="M196 60 l-10 16 h12 l-10 16" ${SA}/>
+  <path d="M310 60 v-15 q0 -8 8 -8 m12 23 v-15 q0 -8 -8 -8" ${SA}/>
+  <rect x="302" y="60" width="34" height="20" rx="4" ${SA}/>
+  <path d="M40 118 h320" ${SD}/>
+`),
+audit: svg(`
+  <rect x="120" y="30" width="90" height="90" ${S}/>
+  <path d="M150 26 h30 v10 h-30 z" ${S}/>
+  <path d="M132 55 l7 7 12 -14 M132 80 l7 7 12 -14" ${SA}/>
+  <path d="M160 52 h40 m-40 25 h40" ${SD}/>
+  <circle cx="280" cy="60" r="20" ${S}/><path d="M280 46 v14 l9 6" ${S}/><path d="M280 36 v-6 m14 10 l5 -5" ${SD}/>
+  <path d="M40 123 h320" ${SD}/>
+`),
+ship: svg(`
+  <path d="M80 95 h240 l-22 25 H100 z" ${S}/>
+  <rect x="110" y="75" width="32 " height="20" ${SA}/><rect x="146" y="75" width="32" height="20" ${S}/><rect x="182" y="75" width="32" height="20" ${SA}/><rect x="218" y="75" width="32" height="20" ${S}/>
+  <rect x="146" y="55" width="32" height="20" ${S}/><rect x="182" y="55" width="32" height="20" ${SA}/>
+  <rect x="262" y="55" width="24" height="40" ${S}/>
+  <path d="M40 125 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0 q20 -8 40 0 q20 8 40 0" ${SD}/>
+`),
+globe: svg(`
+  <circle cx="200" cy="72" r="42" ${S}/>
+  <ellipse cx="200" cy="72" rx="42" ry="16" ${SD}/>
+  <ellipse cx="200" cy="72" rx="18" ry="42" ${SD}/>
+  <path d="M158 72 h84" ${SD}/>
+  <path d="M120 40 Q160 5 215 28" ${SA} stroke-dasharray="5 5"/><path d="M215 28 l-9 -1 5 8" ${SA}/>
+  <path d="M280 110 Q250 135 205 118" ${SA} stroke-dasharray="5 5"/>
+  <circle cx="118" cy="42" r="3" fill="#f0a132" stroke="none"/><circle cx="282" cy="108" r="3" fill="#f0a132" stroke="none"/>
+`),
+covid: svg(`
+  <circle cx="120" cy="60" r="22" ${S}/>
+  <path d="M120 30 v-10 M120 90 v10 M90 60 h-10 M150 60 h10 M99 39 l-7 -7 M141 81 l7 7 M141 39 l7 -7 M99 81 l-7 7" ${S}/>
+  <circle cx="112" cy="54" r="3" ${SD}/><circle cx="128" cy="64" r="3" ${SD}/><circle cx="118" cy="70" r="2" ${SD}/>
+  <path d="M230 115 V70 l40 -18 v18 l40 -18 v63" ${SD}/>
+  <path d="M250 85 h14 m-14 10 h14" ${SD}/>
+  <rect x="290" y="40" width="55" height="30" rx="6" ${SA}/>
+  <text x="298" y="60" fill="#f0a132" font-size="12" font-family="monospace">CLOSED</text>
+  <path d="M40 123 h330" ${SD}/>
+`),
+ai: svg(`
+  <rect x="110" y="40" width="60" height="60" rx="8" ${SA}/>
+  <path d="M125 60 h30 M125 72 h22 M125 84 h28" ${SA}/>
+  <path d="M110 55 h-20 M110 75 h-20 M110 95 h-20 M170 55 h20 M170 75 h20 M170 95 h20" ${SD}/>
+  <circle cx="82" cy="55" r="3" ${SD}/><circle cx="82" cy="75" r="3" ${SD}/><circle cx="198" cy="55" r="3" ${SD}/><circle cx="198" cy="75" r="3" ${SD}/>
+  <path d="M250 100 l20 -40 q5 -10 15 -5 l25 12" ${S}/>
+  <circle cx="312" cy="70" r="8" ${S}/>
+  <path d="M250 100 h40" ${S}/>
+  <path d="M300 40 q10 -12 24 -4" ${SD} stroke-dasharray="3 4"/>
+  <path d="M40 123 h330" ${SD}/>
+`),
+legacy: svg(`
+  <path d="M90 115 V70 l40 -18 v18 l40 -18 v63" ${SD}/>
+  <rect x="220" y="45" width="100" height="70" ${S}/>
+  <rect x="250" y="80" width="40" height="35" ${SD}/>
+  <path d="M220 45 l50 -22 50 22" ${S}/>
+  <circle cx="150" cy="95" r="9" ${SA}/><path d="M150 104 v14 M150 108 l-8 8 M150 108 l8 8" ${SA}/>
+  <circle cx="172" cy="98" r="7" ${S}/><path d="M172 105 v13 M172 108 l-6 7 M172 108 l6 7" ${S}/>
+  <path d="M40 123 h330" ${SD}/>
+`)
+};
+
+// ============ GLOSSARY ============
+const TERMS = {
+  "lead time":"Total time from receiving an order to delivering it. Customers buy speed as much as price.",
+  "rework":"Fixing defective parts after they are made. Pure waste — you pay twice to make the part once.",
+  "OEE":"Overall Equipment Effectiveness = Availability × Performance × Quality. The single best measure of how well a plant uses its machines. World-class is ~85%.",
+  "downtime":"Time a machine is not producing — breakdowns, changeovers, waiting for material. Every minute is money lost.",
+  "takt time":"The rhythm of customer demand: available time ÷ units required. Faster builds excess inventory; slower misses deliveries.",
+  "5S":"Sort, Set in order, Shine, Standardise, Sustain — workplace organisation discipline. The foundation of every serious factory.",
+  "preventive maintenance":"Servicing machines on schedule before they break. Trades small planned downtime for large unplanned downtime.",
+  "PPM":"Defective Parts Per Million shipped. Automotive customers expect under 50 PPM — 99.995% good parts.",
+  "PPAP":"Production Part Approval Process — the formal evidence package an automotive customer demands before you may ship a single production part.",
+  "poka-yoke":"Mistake-proofing: designing a process so errors are physically impossible (e.g., a fixture that will not accept a part backwards).",
+  "kaizen":"Continuous improvement in small daily steps, driven by the people doing the work — not just managers.",
+  "OTD":"On-Time Delivery: % of orders delivered on the promised date. In automotive, a missed delivery can stop a customer line.",
+  "IATF 16949":"The global quality management standard for automotive suppliers. No certificate, no business.",
+  "changeover":"Time lost switching a machine from one part to another. SMED techniques attack this waste.",
+  "bottleneck":"The slowest step in a process — it sets the output of the whole plant. An hour lost at the bottleneck is an hour lost forever.",
+  "SQDCM":"Safety, Quality, Delivery, Cost, Morale — the five boards on the wall of nearly every serious factory, reviewed daily, in that order. Safety always comes first.",
+  "andon":"A signal — light or cord — any worker can trigger to stop the line when something is wrong. Stopping the line to fix problems beats hiding them.",
+  "LTIFR":"Lost Time Injury Frequency Rate — injuries causing lost workdays per million hours worked. The number every plant manager reads first."
+};
+function T(word, key){ const def = TERMS[key] || TERMS[word] || TERMS[word.toLowerCase()] || ""; return `<span class="term" data-def="${def}">${word}</span>`; }
+
+// ============ METRICS ============
+const FOUNDER_METRICS = {
+  cash:   {name:"Cash", color:"var(--accent)", fmt:v=>"₹"+v+"L"},
+  resolve:{name:"Resolve", color:"var(--purple)", fmt:v=>v},
+  reputation:{name:"Reputation", color:"var(--blue)", fmt:v=>v},
+  oee:    {name:"Plant OEE", color:"var(--teal)", fmt:v=>v+"%"}
+};
+const SQDCM = [
+  {key:"S", name:"Safety"},
+  {key:"Q", name:"Quality"},
+  {key:"D", name:"Delivery"},
+  {key:"C", name:"Cost"},
+  {key:"M", name:"Morale"}
+];
+
+// ============ STORY ============
+const CHAPTERS = [
+{
+  title:"Chapter 1 · The Leap", pill:"Chapter 1 — The Leap", year:"YEAR ZERO · PUNE",
+  art:"rain_drive", head:"THE LEAP",
+  hook:"“Every great factory was once one person's unreasonable decision.”",
+  text:"Seventeen years at Hexler Industries. Another reorg, another boss half your age, another “strategic realignment” of your ideas into someone else's slide deck. On the drive home through Pune rain, you pass the old Kadam Engineering workshop — shutters down, FOR SALE sign rusting. Your grandfather was a toolmaker. Your hands remember things your job never asked of them. That night, you tell your family: <em>“I'm going to build something.”</em>",
+  unlock:"Your journey starts simple. Two numbers rule your life now: <b>Cash</b> (₹ lakhs — hit zero and the dream dies) and <b>Resolve</b> (your personal fuel — burnout ends stories too). <b>Reputation</b> — the market's memory of you — starts near zero. Everything else comes later. That's how it really happens.",
+  scenes:[
+  { art:"workshop_gate",
+    story:`The Kadam workshop costs ₹38 lakh — almost everything you have. Inside: two ancient lathes, a milling machine older than you, pigeons in the rafters, forty years of oil soaked into the floor. The broker shrugs: <em>"Machines included. As-is."</em>`,
+    fact:"Honda started in a 12-square-metre wooden shack in 1946, fitting war-surplus radio generator engines to bicycles. Soichiro Honda's first 'factory' had one machine tool and his wife as the test rider.",
+    choices:[
+      {label:"Buy it outright. All in. No retreat.", outcome:"The keys are heavy in your palm. You are now a person with a workshop, no income, and a thudding heart. Your spouse says nothing at dinner, which says everything.", fx:{cash:-30, resolve:+12, reputation:+2}},
+      {label:"Negotiate a lease-to-own deal to preserve cash.", outcome:"Three weeks of haggling. The owner's son agrees: ₹60k/month, purchase option in two years. Slower, safer — but every month now has a meter running.", fx:{cash:-8, resolve:+5}},
+      {label:"Take a partner — your old colleague Vikram offers half the money for 40% of the dream.", outcome:"The burden halves, and so does the ownership. Vikram is sharp with money but has opinions. Many opinions.", fx:{cash:-15, resolve:+3, reputation:+5}}
+    ]},
+  { art:"old_lathe",
+    story:`Week one. The big lathe coughs to life, runs four minutes, and dies with a smell of burnt insulation. Old Mr. Pawar, who worked here thirty years, appears at the gate: <em>"I heard someone bought Kadam's place. That lathe — I know her moods."</em> He wants ₹35,000 a month. You can barely pay yourself.`,
+    fact:"A 1960s manual lathe in skilled hands can hold tolerances of 0.01mm — finer than a human hair (0.07mm). The machine matters less than the hands; this is why master machinists in Japan are designated 'Living National Treasures'.",
+    choices:[
+      {label:"Hire Pawar. Experience is cheaper than ignorance.", outcome:"In three days Pawar has the lathe purring and has taught you more about machines than any manual. Worth every rupee — if the rupees last.", fx:{cash:-7, resolve:+8, reputation:+4}},
+      {label:"Fix it yourself with YouTube and stubbornness.", outcome:"Two weeks, burnt fingers, one rewound motor. It runs — at 70% speed. You learned a lot. You also lost two weeks you did not have.", fx:{cash:-3, resolve:-8}},
+      {label:"Scrap the old machines; lease one modern CNC instead.", outcome:"A gleaming CNC arrives. The EMI arrives faster. But your little shop can now hold tolerances the old lathes only dreamed of.", fx:{cash:-12, resolve:+4, reputation:+6}}
+    ]},
+  { art:"moonlight",
+    story:`A month in, savings bleeding, your old employer calls — contract drafting work, decent money, remote. It would fund the workshop... and consume the hours the workshop needs. This is the question every founder meets: <em>do you keep one foot on the dock?</em>`,
+    fact:"Research on 5,000+ entrepreneurs (Wharton) found founders who kept their day job initially were 33% LESS likely to fail — but founders of eventual high-growth manufacturers overwhelmingly went all-in early. Capital-intensive dreams punish divided attention.",
+    choices:[
+      {label:"Refuse. The boats are burned. Full focus.", outcome:"Terrifying and clean. Every morning you are at the workshop by 7. Hunger, it turns out, is a scheduling tool.", fx:{cash:-5, resolve:+10, reputation:+3}},
+      {label:"Take the contract work nights and weekends.", outcome:"The money helps. But you are drafting flange drawings at midnight and machining at dawn. Something in your back now makes the same sound as the old lathe.", fx:{cash:+12, resolve:-12}},
+      {label:"Counter-offer: you'll do it — as a paid pilot order for machined parts instead.", outcome:"Audacious. Your ex-boss laughs — then actually sends a tiny order for jig components. Your first invoice with YOUR company name on it.", fx:{cash:+6, resolve:+8, reputation:+6}}
+    ]}
+  ]
+},
+{
+  title:"Chapter 2 · First Blood", pill:"Chapter 2 — The First Order", year:"YEAR ONE · THE WORKSHOP",
+  art:"first_order", head:"FIRST BLOOD",
+  hook:"“In manufacturing, your word is a date and a dimension.”",
+  text:"Word travels in industrial estates. Deshmukh Pumps needs 500 precision shaft sleeves — their regular supplier botched a batch. Their purchase manager looks around your shop, unimpressed: <em>“Three weeks. ₹2.4 lakh. Mess it up and everyone on this street will know.”</em> This is it. Your first real order.",
+  unlock:"Real customers bring real measures. Two tiles light up on your board: <b>Q — Quality</b> (right-first-time parts) and <b>D — Delivery</b> (promises kept, on the date). This board has a name in every serious factory: " + T("SQDCM") + ". You'll earn the other three letters as you grow.",
+  sqdcmUnlock:["Q","D"],
+  scenes:[
+  { art:"inspection",
+    story:`You study the drawing. Tolerance: ±0.02mm on the sleeve bore. Your old lathe can do it on a good day with Pawar's hands. The question is process: rush all 500 through fast, or build a careful routine? Your ${T("lead time")} is three weeks — tight but doable... if nothing breaks.`,
+    fact:"The 1-10-100 rule of quality costs: a defect caught at your machine costs ₹1 to fix, caught at final inspection ₹10, caught by your customer ₹100 — and caught in the field, sometimes the whole company.",
+    choices:[
+      {label:"Run flat-out, 12-hour days, inspect everything at the end.", outcome:"Day 18: 500 sleeves done. Final inspection: 61 out of tolerance. Frantic " + T("rework") + " around the clock. You ship on day 21, exhausted, margins shredded — but on time.", fx:{cash:+8, resolve:-10, Q:-8, D:+5}},
+      {label:"Set up first-piece inspection, then check every 20th part.", outcome:"Slower start, but drift gets caught on day 6 — a worn insert, swapped in minutes, not discovered in disaster. 500 good sleeves, day 20. Pawar nods. From Pawar, that is a standing ovation.", fx:{cash:+10, resolve:+5, Q:+10, D:+8}},
+      {label:"Outsource 200 sleeves to a neighbouring shop to be safe.", outcome:"Their 200 come back... variable. You quietly re-machine 70. Lesson burned in: your name goes on everything that leaves your gate, no matter whose machine made it.", fx:{cash:+4, resolve:-4, Q:-5, D:+10}}
+    ]},
+  { art:"visitor",
+    story:`Deshmukh's quality head visits unannounced, picks up a sleeve, mics it, says nothing for a long minute. <em>"Not bad. We have a bigger problem — 2,000 impeller hubs, monthly, ongoing. But your shop..."</em> he glances at the pigeon-stained rafters, <em>"...is not a factory."</em> An ongoing contract. Monthly volume. This is the door. It is also four times your capacity.`,
+    fact:"Toyota evaluates suppliers on a principle called 'genchi genbutsu' — go and see for yourself. Their purchasing engineers famously judge a supplier in the first 10 minutes from the state of the floor, the toilets, and whether workers make eye contact.",
+    choices:[
+      {label:"Say yes and figure it out. Buy a second-hand CNC on loan immediately.", outcome:"The loan officer becomes your most-called contact. The used CNC arrives with mystery vibrations. But monthly revenue now exists — a heartbeat instead of a pulse.", fx:{cash:-10, resolve:+6, reputation:+8, D:-5}},
+      {label:"Negotiate a ramp-up: 500/month now, 2,000 by month six.", outcome:"The quality head almost smiles. “A supplier who knows his limits. Rare.” You get the contract — with a growth path you can actually survive.", fx:{cash:+6, resolve:+4, reputation:+10, Q:+5}},
+      {label:"Decline volume; propose to be their high-precision, low-volume specialist.", outcome:"A niche is a fortress. Margins are lovely. But you have capped your own ceiling, and a part of you knows it.", fx:{cash:+8, resolve:-3, reputation:+4, Q:+8}}
+    ]},
+  { art:"hiring",
+    story:`Growth means hands. Two candidates: Sunil, a brilliant machinist who lost his last job for arguing with everyone; and two fresh ITI graduates, eager and blank as new steel. Meanwhile your floor is becoming an archaeology site of chips and unlabelled bins. Pawar mutters about ${T("5S")}: <em>"In Telco we cleaned the machine before we went home. A dirty floor hides every problem."</em>`,
+    fact:"5S is not housekeeping — it is diagnosis. On a clean floor, an oil leak announces itself in minutes. The 'Shine' step at Toyota is formally called 'inspection through cleaning': operators wiping machines daily detect 70% of failures before they happen.",
+    choices:[
+      {label:"Hire Sunil. Skill now, personality later.", outcome:"Sunil's parts are jewellery. Sunil's arguments are war. Pawar threatens to retire twice in a month. Output rises; the air is thick.", fx:{Q:+10, D:+5, resolve:-8}},
+      {label:"Hire the ITI kids; train them Pawar's way.", outcome:"Slower for three months — then something clicks. They do it Pawar's way, every time, written on laminated cards. You have accidentally invented standard work.", fx:{cash:-5, Q:+6, D:+3, resolve:+5, reputation:+3}},
+      {label:"Pause hiring; run a weekend 5S blitz with Pawar first.", outcome:"Saturday: chaos out, shadow boards up, floor painted. Monday: tools found in seconds, a hidden coolant leak discovered. The shop feels — and works — like a different company.", fx:{Q:+8, D:+6, resolve:+4, cash:-2}}
+    ]},
+  { art:"rush",
+    story:`Disaster rehearsal. Deshmukh calls Thursday 6pm: <em>"Line-stop risk at our plant. We need 300 hubs by Monday morning — double your weekly rate. Can you?"</em> Failing your anchor customer is unthinkable. So is shipping garbage.`,
+    fact:"In automotive supply chains a customer line-stop can cost ₹30–80 lakh per HOUR. This is why OEMs track supplier delivery to the minute — and why a supplier who gives honest numbers under pressure is worth more than one who promises everything.",
+    choices:[
+      {label:"Promise it. Run the weekend, all hands, you on a machine too.", outcome:"Monday 5am, the tempo loaded. You deliver. Deshmukh's GM personally calls. Your team is wrecked but walking tall — these are the weekends companies are forged in.", fx:{D:+12, reputation:+10, resolve:-10}},
+      {label:"Promise 200 guaranteed-good by Monday, the rest Tuesday.", outcome:"Their planner reworks the schedule around your honest number. “You're the only supplier who gives us numbers we can plan on.” Trust compounds faster than interest.", fx:{D:+8, reputation:+8, Q:+5, resolve:-3}},
+      {label:"Say yes — and quietly skip final inspection to make the count.", outcome:"You make Monday. Wednesday, their line catches 9 oversize bores — a formal complaint, an 8D demand, a quality hold on YOUR parts. The shortcut becomes the longest road.", fx:{D:+5, reputation:-15, Q:-12, cash:-6}}
+    ]}
+  ]
+},
+{
+  title:"Chapter 3 · The Factory", pill:"Chapter 3 — Scaling Up", year:"YEAR THREE · CHAKAN MIDC",
+  art:"factory", head:"THE FACTORY",
+  hook:"“You are no longer the bottleneck-fixer. You ARE the bottleneck.”",
+  text:"Three years in. A 20,000 sq ft shed in Chakan MIDC. Six CNCs, eighteen people becoming forty, Pawar as plant head, Sunil (mellowed, mostly) running tooling. Revenue ₹4 crore. But growth has brought a new enemy: <em>chaos at scale</em>. Machines idle mysteriously. Orders trip over each other. And one morning, an ambulance comes to the gate.",
+  unlock:"The full " + T("SQDCM") + " board lights up — and notice what comes FIRST. <b>S — Safety</b>: in every real factory the day starts with it, because nothing else matters if people get hurt. <b>C — Cost</b> joins too: efficiency is now survival. And one master number appears above the board: " + T("Plant OEE","OEE") + " — yours is a humbling 52%. World class is 85%. Plus <b>M — Morale</b>: machines don't improve themselves; people do.",
+  sqdcmUnlock:["S","C","M"], founderUnlock:["oee"],
+  scenes:[
+  { art:"safety",
+    story:`The ambulance. A young operator, rushing a job, reached past a missing guard on CNC #3 — eleven stitches across the forearm. It could have been far worse. Production stops; everyone gathers. Pawar's face is grey: <em>"In thirty years I saw two men die. Both times, everyone knew the hazard. Both times, production came first."</em> The guard had been missing for a month. Everyone knew.`,
+    fact:"Heinrich's safety pyramid (1931, still validated): for every serious injury there are ~29 minor injuries and ~300 near-misses. World-class plants obsess over near-misses precisely because they are free warnings. The metric is " + T("LTIFR") + " — and the best plants run years at zero.",
+    choices:[
+      {label:"Stop ALL machines for a 2-day safety audit. Fix every guard, every interlock. Eat the delivery hit.", outcome:"Customers grumble at the slip. But the message lands like a hammer: nothing outranks safety. Workers start reporting near-misses — eleven in the first month. Each one is a disaster that never happened.", fx:{S:+15, D:-6, M:+10, cash:-5}},
+      {label:"Fix CNC #3, brief everyone, keep running. Deliveries can't slip.", outcome:"The schedule is saved. But the floor heard the real message: deliveries outrank fingers. The next missing guard will not be reported — it will be worked around, quietly.", fx:{S:-8, D:+4, M:-8}},
+      {label:"Fix the guard, then make the injured operator the plant's first Safety Champion with real authority.", outcome:"From his bandages, he runs the morning safety brief. Nobody can dismiss safety as management theatre when its voice has eleven stitches. A culture begins.", fx:{S:+10, M:+8, cash:-2}}
+    ]},
+  { art:"whiteboard",
+    story:`Pawar's whiteboard tells the ugly truth: ${T("OEE")} at 52%. Breakdowns eat 11% of time, ${T("changeover","changeover")}s eat 9%, waiting-for-material eats more. The #3 CNC — your ${T("bottleneck")} — broke down twice this month, mid-batch. Pawar wants a ${T("preventive maintenance")} program. Sunil wants a seventh machine. The bank would prefer you wanted neither.`,
+    fact:"OEE maths is brutal: 90% availability × 80% performance × 95% quality = 68% OEE, not the 88% average of the three. The multiplication punishes every weakness. A typical unmanaged plant runs 40–60%; the gap to 85% is usually a free factory hiding inside your factory.",
+    choices:[
+      {label:"Buy the seventh machine. Capacity solves everything.", outcome:"The new CNC absorbs the load... and within months idles like the rest, starved by the same scheduling chaos. You have automated the production of waiting. OEE: 51%.", fx:{cash:-15, oee:-1, C:-6, M:+3}},
+      {label:"No new machines: preventive maintenance + SMED changeover attack.", outcome:"Three months of unglamorous discipline. Breakdowns halve. Changeovers fall from 40 to 14 minutes. OEE climbs to 63% — you found a hidden machine inside the machines you already own.", fx:{cash:-4, oee:+11, Q:+4, C:+8, M:+5}},
+      {label:"Hire a consultant for a full lean assessment first.", outcome:"₹6 lakh and six weeks later: a 90-page deck saying what Pawar said for free. But the bank loves it, and one chart — your value-stream map — changes how you see everything.", fx:{cash:-6, oee:+4, C:+2, reputation:+4}}
+    ]},
+  { art:"rush",
+    story:`A fire at a competitor floods you with enquiries. Tempting volume — but your planning is a whiteboard and Pawar's memory. Expedites jump the queue daily, and every expedite makes three other orders late. Delivery has slipped to 81%. The plant doesn't need more orders. It needs a drumbeat — production planned to ${T("takt time")}, not to whoever shouts loudest.`,
+    fact:"Little's Law — the physics of every factory: Lead Time = Work-in-Progress ÷ Throughput. Accept more orders without more throughput and lead times MUST grow. No amount of shouting changes the equation; it is why overloaded plants get slower for everyone.",
+    choices:[
+      {label:"Take every order. Revenue first, systems later.", outcome:"Two glorious, monstrous months. Then the pile-up: Delivery craters to 68%, two new customers leave angrier than they arrived, and Deshmukh — loyal Deshmukh — issues a vendor warning.", fx:{cash:+15, D:-13, reputation:-8, M:-8, C:+4}},
+      {label:"Take 40%, and implement a weekly planning rhythm with frozen schedules.", outcome:"Saying no to money hurts. But the plant finds a cadence: Monday plans, Friday reviews, no queue-jumping. Delivery rebounds to 90%. Calm, it turns out, is a capability.", fx:{cash:+8, D:+9, oee:+5, M:+6}},
+      {label:"Take the volume but subcontract overflow to three audited small shops.", outcome:"You become what Deshmukh once was to you. One subcontractor is a gem, one is adequate, one teaches you why incoming inspection exists. A supplier network is born — clumsily.", fx:{cash:+10, Q:-6, D:+3, C:+3, reputation:+3}}
+    ]},
+  { art:"canteen",
+    story:`The strike that almost was. New shift timings, announced by notice board, land badly. Forty people now, and most don't know you from the old workshop days. A worker named Kale becomes the voice: <em>"We're not machines you schedule."</em> Pawar, old-school, says hold firm. Your HR consultant says negotiate. Morale is the lowest it has ever been.`,
+    fact:"Toyota's deepest insight was never about machines: 'Before we build cars, we build people.' Studies across 1,000+ plants show morale and quality correlate at r≈0.6 — the strongest single predictor of defect rates is whether workers believe management listens.",
+    choices:[
+      {label:"Hold firm. The schedule is an operational necessity.", outcome:"You win the schedule and lose the room. Quiet resentment shows up where you cannot see it — in care, in attention, in the small extra checks nobody is paid to do. Defects tick up.", fx:{M:-12, Q:-6, oee:-3}},
+      {label:"Open the books: show the team why, then co-design shifts with them.", outcome:"You project the plant's costs on the canteen wall. Silence, then questions, then ideas — Kale himself proposes a rotation better than yours. The schedule lands. So does something bigger: trust.", fx:{M:+14, oee:+4, resolve:+4}},
+      {label:"Offer a production bonus to sweeten the change.", outcome:"It works — too well. Output rises, but so do shortcuts; bonus-chasing breeds quality drift. You learn that what you pay for is exactly what you get.", fx:{M:+5, oee:+5, Q:-7, cash:-5}}
+    ]},
+  { art:"kaizen",
+    story:`Kale, post-truce, is full of ideas. Pawar wants to formalise it: a ${T("kaizen")} program — small daily improvements from the floor itself. Sunil scoffs: <em>"Suggestion boxes are where ideas go to die."</em> Meanwhile a recurring defect — a missed chamfer — keeps escaping. A fixture redesign could make the error physically impossible: a ${T("poka-yoke")}.`,
+    fact:"Toyota receives over 1 million employee improvement ideas per year and implements ~90% of them. The average saving per idea is small; the cultural compounding is not. Shigeo Shingo, who invented poka-yoke, held that 'errors are inevitable; defects are optional.'",
+    choices:[
+      {label:"Launch kaizen properly: weekly 30-min huddles, ideas implemented within a week.", outcome:"Month one: trivia. Month three: a fixture idea from a 22-year-old operator saves 4 seconds per part — ₹3 lakh a year. The floor starts seeing the plant as theirs to improve.", fx:{oee:+7, M:+8, Q:+5, C:+5, cash:-2}},
+      {label:"Skip programs; fix the chamfer with a poka-yoke fixture and move on.", outcome:"The fixture works — that defect never escapes again. A clean, surgical win. But improvement remains something YOU do to the plant, not something the plant does to itself.", fx:{Q:+8, oee:+2}},
+      {label:"Tie kaizen to cash rewards per idea.", outcome:"A flood of ideas — many recycled, some gamed, a few brilliant. The accountant is unhappy, Pawar is sceptical, but two genuinely great fixes emerge. Messy, like most real things.", fx:{oee:+4, M:+4, cash:-5, Q:+3}}
+    ]}
+  ]
+},
+{
+  title:"Chapter 4 · The Big League", pill:"Chapter 4 — Automotive", year:"YEAR SIX · NASHIK",
+  art:"automotive", head:"THE BIG LEAGUE",
+  hook:"“In automotive, quality is measured in defects per million — and a late truck can stop a 2,000-car-a-day line.”",
+  text:"A scout from Mahendra Motors — yes, THE Mahendra — visits unannounced (they always do). They need a second source for gearbox synchroniser hubs. The prize: automotive volumes, multi-year visibility, a logo on your wall that changes every conversation. The price: a world where audits are blood sport and the air is very, very thin.",
+  unlock:"Same board, far thinner air. <b>Q</b> is now scored in " + T("PPM") + ", not percent. <b>D</b> means a truck at their dock at 6:40am — not “this week”. <b>C</b> faces annual price-down demands of 3–5%. Welcome to the big league.",
+  scenes:[
+  { art:"ppap",
+    story:`First hurdle: the ${T("PPAP")} — a documentation mountain proving your process can make their part, every time, forever. Control plans, capability studies, measurement system analysis. Sunil calls it bureaucracy. Pawar, who lived this at Telco, calls it religion. Four months and ₹25 lakh to do properly — or buy a "PPAP package" from a consultant who dresses up your current process in the right paperwork.`,
+    fact:"PPAP demands proof of process capability: Cpk ≥ 1.67, meaning your process variation fits inside the tolerance five times over. It is the difference between 'we made 5 good samples' and 'we cannot make a bad one'. Submission levels run 1–5; Level 3 is the automotive default.",
+    choices:[
+      {label:"Do it properly: rebuild the process to be capable, then document the truth.", outcome:"Four brutal months. You discover your spindle alignment was marginal for years — nobody knew because nobody measured. The PPAP passes Level 3 on first submission. Rare air.", fx:{cash:-20, Q:+12, reputation:+10, oee:+3}},
+      {label:"Buy the dressed-up paperwork. Get approved now, improve later.", outcome:"Approved on paper. Three months in, their SQE audits the actual line, finds the gap between document and reality, and your rating turns amber. Trust, once amber, fades slowly.", fx:{cash:-8, reputation:-10, Q:-4}},
+      {label:"Negotiate a longer timeline; do it properly but slower.", outcome:"Their program manager respects candour — second sources that implode help nobody. You get seven months. The breathing room saves your team's sanity.", fx:{cash:-14, Q:+10, reputation:+6, M:+4}}
+    ]},
+  { art:"eightd",
+    story:`Week nine of production: Mahendra's incoming inspection flags 3 hubs from a lot of 5,000 — undersize spline. That is 600 ${T("PPM")} against a contract limit of 50. The formal 8D lands like a court summons. Root cause hides somewhere between a tool-wear pattern and an operator who may have skipped a check. The plant holds its breath: how does the boss handle the first big failure?`,
+    fact:"The 8D (Eight Disciplines) method came from Ford in 1987. Its hardest discipline is D4 — root cause — where '5 Whys' was born at Toyota: ask why five times and you usually travel from 'operator error' to a system design flaw. Blame is where root-cause analysis goes to die.",
+    choices:[
+      {label:"Find who skipped the check. Accountability must be visible.", outcome:"You find him — a good operator, exhausted from a double shift you approved. The firing chills the floor. Problems start getting hidden instead of reported, which is how small problems grow teeth.", fx:{M:-12, Q:-5, S:-4, reputation:+2}},
+      {label:"Blame the process, not the person: why COULD the check be skipped at all?", outcome:"The investigation becomes a masterclass: a " + T("poka-yoke") + " gauge the part physically cannot bypass, plus tool-life tracking. Mahendra's SQE writes: 'supplier demonstrates mature quality culture.'", fx:{Q:+12, M:+8, reputation:+8, cash:-4}},
+      {label:"Dispute the finding — 3 parts in 5,000, within their measurement uncertainty? Fight it.", outcome:"You win the technical argument and lose the relationship war. Nobody at Mahendra remembers the metrology debate; everybody remembers the supplier who argued instead of fixed.", fx:{reputation:-8, resolve:-4}}
+    ]},
+  { art:"covid",
+    story:`Then the world stops. A virus with a crown-shaped name empties the roads of Nashik. Lockdown: Mahendra's plant shut, your plant shut, zero revenue — but salaries, EMIs and rent march on like an army that never sleeps. Cash burn: ₹45 lakh a month. Vikram wants 40% layoffs by Friday. Pawar, on a crackling phone line: <em>"A factory is not the machines. Lose the people and you lose the factory."</em>`,
+    fact:"In April 2020 Indian auto production fell to literally ZERO units — the first month of nothing in industry history. Yet suppliers who retained skilled workers recovered to full output 3–4 months faster than those who cut deep; recovery speed, not lockdown survival, decided who won the rebound.",
+    choices:[
+      {label:"No layoffs. Cut your own salary to zero, negotiate deferrals, protect every job.", outcome:"Four months of fear and dwindling accounts. But when the rebound comes — and it comes like a flood — you are the only supplier in the cluster at full strength while rivals scramble to rehire. Loyalty, it turns out, was working capital.", fx:{cash:-22, M:+15, reputation:+10, D:+8}},
+      {label:"Cut 40% now, survive certain, rebuild later.", outcome:"The company survives comfortably. But the rebound finds you short-handed; trained machinists you released now work for competitors. Rehiring costs more than retaining ever would have — and the floor remembers who blinked first.", fx:{cash:+8, M:-15, D:-8, Q:-5}},
+      {label:"Pivot: retool two lines for ventilator and oxygen-plant components under emergency orders.", outcome:"Eighteen-hour days converting CNCs to medical tolerances. Margins are thin and certification is frantic — but the plant runs, salaries flow, and a photo of your team beside a ventilator rack ends up in the national press.", fx:{cash:-6, reputation:+14, M:+10, oee:-4}}
+    ]},
+  { art:"plant_choice",
+    story:`Scale-up demands a new plant. Two paths: greenfield near Mahendra's Nashik plant (₹18 crore, two years, designed right from day one) — or acquiring Patil Auto Parts, a struggling competitor with a ready plant, an ${T("IATF 16949")} certificate, tired machines and 130 demoralised employees. Vikram wants the acquisition. Pawar wants greenfield: <em>"You can't un-bake a bad cake."</em>`,
+    fact:"Plant layout is destiny: material in a poorly laid-out factory travels 10–50× further than the value-adding distance. Toyota's Tsutsumi plant moves a car body ~300 metres of pure process; a bad jobshop moves an equivalent part several kilometres. You pay for every metre, forever.",
+    choices:[
+      {label:"Greenfield. Design the perfect plant: flow, takt, daylight, no legacy.", outcome:"Two years of construction stress and capex sweats. But the plant flows like water — 78% OEE within a year of launch. Visitors ask for tours. Pawar cries at the inauguration; claims it is dust.", fx:{cash:-25, oee:+12, Q:+6, S:+6, M:+6}},
+      {label:"Acquire Patil. Speed matters more than perfection.", outcome:"Day one you inherit revenue, certification — and culture debt. A year of hard integration; 30 people leave, others bloom under leadership they had been starved of. Faster, uglier, cheaper. Probably right. You will never be sure.", fx:{cash:-15, oee:+4, M:-5, reputation:+6, D:+5}},
+      {label:"Neither: max out the current plant — third shift plus flow redesign.", outcome:"You squeeze 40% more from the same walls. Cheapest capacity in the world is the capacity hiding in your own plant. But the ceiling is now visibly close — and night shifts strain bodies and families.", fx:{cash:-5, oee:+9, D:+4, C:+8, M:-3, S:-2}}
+    ]},
+  { art:"ev",
+    story:`The EV question. Mahendra announces 30% EV by 2030. Synchroniser hubs — your bread and butter — do not exist in an EV gearbox. Your engineers identify adjacencies: e-axle housings, motor shafts, battery frames. All need investment, new competencies, new machines. Sunil, now head of engineering, puts it plainly: <em>"We can be early, on time, or dead."</em>`,
+    fact:"An ICE powertrain has ~2,000 moving parts; an EV drivetrain has ~20. McKinsey estimates 30–40% of traditional powertrain supplier revenue is at structural risk by 2035. For machining companies, EV is not a product change — it is a question of what the machines exist to do.",
+    choices:[
+      {label:"Pivot hard: dedicate a full line and R&D budget to EV components now.", outcome:"You are early — painfully early. The line runs at 30% load for 18 months. Then the orders come, and you are one of three qualified suppliers in the country while competitors are still making business cases.", fx:{cash:-18, reputation:+12, oee:-5, C:-5, resolve:+5}},
+      {label:"Hedge: win one EV co-development order; learn on the customer's money.", outcome:"A development contract for motor shafts — modest revenue, priceless learning. You build EV competence with a customer pulling you forward instead of capital pushing you blind.", fx:{cash:-5, reputation:+8, Q:+4}},
+      {label:"Milk the ICE business; gearboxes will outlive the hype.", outcome:"Margins stay fat for three more years and the cash is real. But two rivals announce EV lines, and at the next vendor meet Mahendra's purchasing head asks about your 'future readiness roadmap'. You do not have one.", fx:{cash:+15, C:+6, reputation:-8, resolve:-5}}
+    ]}
+  ]
+},
+{
+  title:"Chapter 5 · The World", pill:"Chapter 5 — Going Global", year:"YEAR ELEVEN · HANNOVER",
+  art:"globe", head:"THE WORLD",
+  hook:"“Indian suppliers promise everything and audit poorly. Convince us you're different.”",
+  text:"Three plants, 900 people, ₹220 crore revenue, your e-axle housings in two EV platforms. At Hannover Messe, a German Tier-1 — Brandt Antriebstechnik — stops at your booth and stays an hour. They want a low-cost, high-quality sourcing base outside China. The VP's parting words hang in the air like a gauntlet thrown.",
+  unlock:"The global game is your whole board at once: " + T("OEE") + " proves competitiveness, " + T("PPM") + "-level quality earns entry, delivery across oceans keeps it — and culture is what auditors smell in the first ten minutes. Every tile matters now. Every day.",
+  scenes:[
+  { art:"audit",
+    story:`Brandt's audit is unlike anything you have faced: two days, three auditors, your actual shop floor — not your conference room. They interview operators alone. They ask a 23-year-old on line 4 what she does if she finds a suspect part. They time a ${T("changeover")} with their own stopwatch. The week before, Sunil offers to "prepare" the floor — banners, fresh paint, briefing cards.`,
+    fact:"The VDA 6.3 process audit (German automotive standard) scores ~50 questions across the product lifecycle; below 80% means no business. Auditors are trained to detect 'audit theatre' — fresh paint, new bins, rehearsed answers — and to ask the same question three ways, to three people, on two days.",
+    choices:[
+      {label:"No theatre. They see the plant exactly as it runs on a Tuesday.", outcome:"The auditors notice — they always notice. The young operator answers the suspect-part question from genuine habit: she pulls the " + T("andon") + " cord. Score: 89/100. 'The most honest plant we have audited in Asia,' the report says.", fx:{reputation:+14, M:+8}},
+      {label:"Prepare thoroughly — paint, banners, scripted answers.", outcome:"The floor gleams. Then an auditor asks an operator a follow-up off-script, and the rehearsed answer collapses in real time. 71/100: 'evidence of audit preparation.' In German, that is not a compliment.", fx:{reputation:-6, M:-4, cash:-3}},
+      {label:"Postpone six months; fix the real gaps the mock-audit found first.", outcome:"Brandt respects the candour but parks you in their pipeline. When the audit happens you score 92 — yet a Thai competitor took the first program while you were perfecting. Time has a price too.", fx:{Q:+8, reputation:+4, cash:-6}}
+    ]},
+  { art:"ship",
+    story:`The contract comes — e-axle housings shipped to Hungary, 11,000 km away. Delivery now involves the Suez canal's moods, euro exposure, and a customs officer's lunch schedule. One late vessel could idle their line at €40,000 an hour. Your supply chain head presents options for the ocean of risk between your dock and theirs.`,
+    fact:"A single large container vessel carries ~20,000 TEU and a delay ripples for weeks: when the Ever Given blocked Suez for 6 days in 2021, it held up ~$60 billion of trade and stopped European production lines within 10 days — the cost of the 'just-in-time across oceans' bet, made visible.",
+    choices:[
+      {label:"Air-freight insurance policy: sea by default, air at the first sign of delay, whatever the cost.", outcome:"Twice in year one you burn ₹40 lakh on air freight. Brandt never sees a late part and tells other divisions about you. Expensive insurance — but reputation in Europe is bought exactly once.", fx:{cash:-10, D:+12, C:-6, reputation:+10}},
+      {label:"Build a 3-week buffer warehouse in Hungary, near their plant.", outcome:"Working capital takes a permanent hit, but deliveries become boring — the highest compliment in logistics. The warehouse later becomes your European staging point. Accidental strategy is still strategy.", fx:{cash:-12, D:+10, C:-3, oee:+2}},
+      {label:"Negotiate Incoterms so risk transfers at the Indian port. Their problem after that.", outcome:"Legally elegant. Commercially naive. The first delayed vessel is contractually 'not your fault' and relationally entirely your fault. Brandt's planner does not read Incoterms; she reads the empty rack.", fx:{cash:+4, D:-8, reputation:-8}}
+    ]},
+  { art:"ai",
+    story:`The AI question arrives wearing a hoodie. Your new digital head — poached from a Bengaluru startup — demos a pilot: sensors on CNC #14 predicted a spindle bearing failure nine days before it happened. Now she wants ₹8 crore for a full smart-factory rollout: IIoT sensors everywhere, AI vision inspection, a digital twin of the Nashik plant. Sunil is sceptical: <em>"I've seen 'Industry 4.0' decks since 2015. Most bought dashboards, not results."</em> Pawar, 74, visiting on a Friday, surprises everyone: <em>"In my day we listened to machines with a screwdriver against the ear. If a computer can listen better — let it listen."</em>`,
+    fact:"McKinsey found ~70% of digital-manufacturing pilots die in 'pilot purgatory' — never scaling beyond one line. The winners share one trait: they digitise a process they had ALREADY stabilised. AI on a chaotic process just predicts chaos faster. Done right, predictive maintenance cuts unplanned downtime 30–50%, and AI vision inspection catches defects at rates human eyes simply cannot sustain past 20 minutes of focus.",
+    choices:[
+      {label:"Full rollout: ₹8 crore, every line, two-year smart-factory transformation.", outcome:"Year one is humbling — data swamps, integration nightmares, three vendors fired. Year two, the curve bends: OEE prediction, energy optimisation, vision systems catching 12-PPM defects. Brandt's auditors photograph YOUR dashboards now.", fx:{cash:-20, oee:+10, Q:+8, C:+6}},
+      {label:"Scale what worked: predictive maintenance on all bottleneck machines first, one use-case at a time.", outcome:"Unfashionable and effective. Each use-case pays for the next; the digital head grumbles about ambition but the CFO sleeps at night. In three years you arrive at the same smart factory — profitably, and with the floor's trust.", fx:{cash:-8, oee:+8, Q:+5, M:+4}},
+      {label:"Decline. Machines plus skilled people built this company; fashion passes.", outcome:"For two years, nothing bad happens — which is the trap. Then a rival lands a Brandt program partly on the strength of real-time quality data you cannot provide. The future does not announce itself; it just stops calling.", fx:{cash:+5, reputation:-9, C:-4}}
+    ]},
+  { art:"legacy",
+    story:`The endgame question. You are 54. Revenue ₹600 crore. A global private equity fund offers to buy 60% at a valuation that would make your grandfather's toolbox worth its weight in gold. Vikram wants to sell. Pawar, retired, still visits Fridays; he says nothing, which as always says everything. Your daughter, an engineer, has quietly started attending your management reviews. The fund's partner asks: <em>"What do you want your name to mean?"</em>`,
+    fact:"Germany's Mittelstand — 3.5 million mostly family-owned manufacturers — produces 1,500+ of the world's 'hidden champions' (top-3 globally in a niche). Their average ownership horizon is generations, not quarters. Japan goes further: over 33,000 companies are more than a century old.",
+    choices:[
+      {label:"Sell the majority. Take the wealth, keep a board seat, exhale.", outcome:"The wire transfer has more zeros than your first year's revenue. The fund installs systems, scale — and a CEO who has never held a micrometer. The company grows. Something else does not. On Fridays, you and Pawar drink tea and do not talk about it.", fx:{cash:+30, resolve:-5, M:-6}},
+      {label:"Refuse. Build a 100-year company; groom your daughter and the next generation.", outcome:"Slower wealth, deeper roots. Your daughter rotates through every department — starting, at her own insistence, on the shop floor at the old Chakan plant. The succession plan IS the strategy now.", fx:{resolve:+10, M:+10, reputation:+8}},
+      {label:"Counter: take their money as minority partner to fund a Mexico plant for the Americas.", outcome:"The fund blinks, then agrees — good assets negotiate. Ground breaks in Monterrey within a year. Three continents. The person who bought a pigeon-filled workshop now checks OEE dashboards across nine time zones before breakfast.", fx:{cash:+15, reputation:+10, oee:+3, resolve:+3}}
+    ]}
+  ]
+}];
+
+// ============ DIFFICULTY ============
+const DIFFS = {
+  easy:  {key:"easy",  name:"APPRENTICE", badge:"easy",  cash:50, resolve:72, pos:1.15, neg:0.7,
+          desc:"The forge is kind to newcomers. Setbacks sting less, wins carry further, and you start with a deeper pocket. Learn the language of the floor."},
+  normal:{key:"normal",name:"OPERATOR",   badge:"normal",cash:40, resolve:60, pos:1.0,  neg:1.0,
+          desc:"The real game. Markets are fair but never generous — every trade-off lands at full weight, the way it does on an actual shop floor."},
+  hard:  {key:"hard",  name:"FORGE MASTER", badge:"hard", cash:32, resolve:55, pos:0.85, neg:1.3,
+          desc:"You said you lead. Leaders get audited. Less starting cash, harsher consequences, smaller rewards — because at your level, judgment is the job."}
+};
+let PLAYER = {name:"Founder", exp:null, field:null, role:null, diff:DIFFS.normal};
+
+// ============ ENGINE ============
+let G = {
+  ch:0, sc:-1,
+  founder:{cash:40, resolve:60, reputation:15},
+  founderActive:["cash","resolve","reputation"],
+  board:{S:60, Q:70, D:75, C:55, M:65},
+  boardActive:[],
+  log:[],
+  snap:null
+};
+const $=id=>document.getElementById(id);
+const stage=$("stage");
+const clamp=v=>Math.max(0,Math.min(100,v));
+const tileClass=v=> v>=70?"green": v>=45?"amber":"red";
+
+function renderKPIs(deltas={}){
+  $("kpis").innerHTML = G.founderActive.map(k=>{
+    const m=FOUNDER_METRICS[k], v=G.founder[k], d=deltas[k]||0;
+    const dh=d?`<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>`:"";
+    return `<div class="kpi"><div class="label">${m.name}</div><div class="val">${m.fmt(v)}${dh}</div><div class="bar"><i style="width:${v}%;background:${m.color}"></i></div></div>`;
+  }).join("");
+  renderBoard(deltas);
+}
+function renderBoard(deltas={}){
+  if(G.boardActive.length===0){ $("sqdcmWrap").innerHTML=""; return; }
+  const tiles = SQDCM.map(t=>{
+    const on=G.boardActive.includes(t.key);
+    if(!on) return `<div class="tile locked"><div class="letter">${t.key}</div><div class="tname">${t.name}</div><div class="tval">🔒</div></div>`;
+    const v=G.board[t.key], d=deltas[t.key]||0;
+    const dh=d?`<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>`:"";
+    return `<div class="tile ${tileClass(v)}"><div class="letter ${d?'flash':''}">${t.key}</div><div class="tname">${t.name}</div><div class="tval">${v}${dh}</div></div>`;
+  }).join("");
+  $("sqdcmWrap").innerHTML=`<div class="sqdcm"><div class="board-title"><span>Plant Board · SQDCM</span><span>green ≥70 · amber ≥45 · red &lt;45</span></div><div class="tiles">${tiles}</div></div>`;
+}
+
+// ============ ONBOARDING ============
+const OB = {exp:null, field:null, role:null};
+function obPick(group, idx, btn){
+  OB[group]=idx;
+  [...btn.parentElement.children].forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel");
+  checkObReady();
+}
+function checkObReady(){
+  const ok = $("obName").value.trim().length>0 && OB.exp!==null && OB.field!==null && OB.role!==null;
+  $("obBtn").disabled=!ok; $("obBtn").style.opacity=ok?1:.4;
+}
+function showOnboarding(){
+  $("pill").textContent="Before We Begin";
+  stage.innerHTML=`<div class="card ob">
+    ${ART.workshop_gate}
+    <div class="inner">
+      <h2>Who walks into the forge?</h2>
+      <p class="story" style="margin-bottom:4px">The story adapts to the player. Answer honestly — the forge always finds out anyway.</p>
+      <label>Your name</label>
+      <input type="text" id="obName" maxlength="20" placeholder="What should the story call you?" oninput="checkObReady()">
+      <label>Years of work experience</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('exp',0,this)">0–5 years</button>
+        <button class="opt" onclick="obPick('exp',1,this)">5–15 years</button>
+        <button class="opt" onclick="obPick('exp',2,this)">15+ years</button>
+      </div>
+      <label>Your field</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('field',0,this)">Manufacturing / Ops</button>
+        <button class="opt" onclick="obPick('field',1,this)">Engineering / R&D</button>
+        <button class="opt" onclick="obPick('field',2,this)">Business / Finance / Sales</button>
+        <button class="opt" onclick="obPick('field',3,this)">Other / Student</button>
+      </div>
+      <label>And honestly — who are you?</label>
+      <div class="optrow">
+        <button class="opt" onclick="obPick('role',0,this)">A CEO / business leader at heart</button>
+        <button class="opt" onclick="obPick('role',1,this)">A manager — I run things</button>
+        <button class="opt" onclick="obPick('role',2,this)">A great individual contributor</button>
+        <button class="opt" onclick="obPick('role',3,this)">Still figuring it out</button>
+      </div>
+      <div style="margin-top:22px"><button class="btn" id="obBtn" disabled style="opacity:.4" onclick="assignDifficulty()">Enter the Forge →</button></div>
+    </div></div>`;
+}
+function assignDifficulty(){
+  PLAYER.name=$("obName").value.trim();
+  PLAYER.exp=OB.exp; PLAYER.field=OB.field; PLAYER.role=OB.role;
+  // score: role weighs most, experience second, field nudges
+  let score = [3,2,1,0][OB.role] + [0,1,2][OB.exp] + (OB.field===0?1:0);
+  PLAYER.diff = score>=4 ? DIFFS.hard : score>=2 ? DIFFS.normal : DIFFS.easy;
+  G.founder.cash=PLAYER.diff.cash; G.founder.resolve=PLAYER.diff.resolve;
+  const d=PLAYER.diff;
+  const reason = d.key==="hard" ? "You carry experience and you claim leadership — so the forge will treat you like a leader. No training wheels."
+    : d.key==="normal" ? "You know how things run. The forge will deal with you plainly — fair, but never soft."
+    : "Everyone starts somewhere — even Soichiro Honda started in a shack. The forge will teach before it tests.";
+  stage.innerHTML=`<div class="card">
+    ${ART.old_lathe}
+    <div class="inner" style="text-align:center">
+      <h2>Welcome, ${PLAYER.name}.</h2>
+      <div class="diff-badge ${d.badge}">MODE: ${d.name}</div>
+      <p class="story" style="text-align:left">${reason}</p>
+      <p class="story" style="text-align:left"><em>${d.desc}</em></p>
+      <p class="story" style="text-align:left">Starting position: <b>₹${d.cash}L cash</b> · <b>${d.resolve} resolve</b> · consequences ×${d.neg} on setbacks, ×${d.pos} on wins.</p>
+      <button class="btn" onclick="showChapterIntro()">Begin the Story →</button>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function snapshot(){
+  G.snap={founder:{...G.founder}, board:{...G.board},
+          fActive:[...G.founderActive], bActive:[...G.boardActive]};
+}
+
+function showChapterIntro(){
+  const ch=CHAPTERS[G.ch];
+  $("pill").textContent=ch.pill+" · "+PLAYER.name+" · "+PLAYER.diff.name;
+  snapshot();
+  if(ch.sqdcmUnlock) ch.sqdcmUnlock.forEach(k=>{if(!G.boardActive.includes(k))G.boardActive.push(k);});
+  if(ch.founderUnlock) ch.founderUnlock.forEach(k=>{
+    if(!G.founderActive.includes(k)){G.founderActive.push(k); G.founder[k]= k==="oee"?52:50;}
+  });
+  // keep canonical SQDCM order
+  G.boardActive.sort((a,b)=>SQDCM.findIndex(t=>t.key===a)-SQDCM.findIndex(t=>t.key===b));
+  renderKPIs();
+  stage.innerHTML=`<div class="card opening">
+    ${ART[ch.art]}
+    <div class="inner">
+      <div class="chnum">${ch.title.split("·")[0]}</div>
+      <div class="chname">${ch.head}</div>
+      <div class="year">${ch.year}</div>
+      <div class="hook">${ch.hook}</div>
+      <p class="body">${ch.text}</p>
+      ${ch.unlock?`<div class="unlock" style="text-align:left">📊 ${ch.unlock}</div>`:""}
+      <button class="btn" onclick="nextScene()">Begin Chapter →</button>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextScene(){
+  G.sc++;
+  const ch=CHAPTERS[G.ch];
+  if(G.sc>=ch.scenes.length){ chapterReport(); return; }
+  const s=ch.scenes[G.sc];
+  renderKPIs();
+  stage.innerHTML=`<div class="card">
+    ${ART[s.art]||""}
+    <div class="inner">
+      <div class="chapter-title">${ch.title} · Scene ${G.sc+1}/${ch.scenes.length}</div>
+      <p class="story">${s.story}</p>
+      <div class="choices">${s.choices.map((c,i)=>`<button class="choice" onclick="pick(${i})">${c.label}</button>`).join("")}</div>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function pick(i){
+  const ch=CHAPTERS[G.ch], s=ch.scenes[G.sc], c=s.choices[i];
+  const deltas={};
+  for(const k in c.fx){
+    const isBoard = G.boardActive.includes(k);
+    const isFounder = G.founderActive.includes(k);
+    if(!isBoard && !isFounder) continue;
+    const jitter = Math.abs(c.fx[k])>2 ? Math.floor(Math.random()*3)-1 : 0;
+    const scaled = c.fx[k] * (c.fx[k]<0 ? PLAYER.diff.neg : PLAYER.diff.pos);
+    const d=Math.round(scaled)+jitter;
+    deltas[k]=d;
+    if(isBoard) G.board[k]=clamp(G.board[k]+d);
+    else G.founder[k]=clamp(G.founder[k]+d);
+  }
+  G.log.push({chapter:ch.title, choice:c.label});
+  renderKPIs(deltas);
+
+  if(G.founder.cash<=0){ gameOver("cash", c); return; }
+  if(G.founder.resolve<=0){ gameOver("resolve", c); return; }
+
+  const fxHtml=Object.entries(deltas).map(([k,d])=>{
+    const name = FOUNDER_METRICS[k]?FOUNDER_METRICS[k].name : SQDCM.find(t=>t.key===k).name;
+    return `<span class="${d>=0?'up':'down'}">${name} ${d>=0?'+':''}${d}</span>`;
+  }).join("");
+  stage.innerHTML=`<div class="card">
+    ${ART[s.art]||""}
+    <div class="inner">
+      <div class="chapter-title">${ch.title} · Outcome</div>
+      <p class="story">${c.outcome}</p>
+      <div class="effects">${fxHtml}</div>
+      ${s.fact?`<div class="fact"><b>⚙ Forge Fact</b>${s.fact}</div>`:""}
+      <button class="btn" onclick="nextScene()">Continue →</button>
+    </div></div>`;
+}
+
+function chapterReport(){
+  const ch=CHAPTERS[G.ch];
+  const rows=[];
+  const addRow=(name,was,now,color,fmt)=>{
+    const d=now-was;
+    const dh = was===null ? `<span class="up">NEW</span>` : `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${d}</span>`;
+    rows.push(`<div class="rowm"><span class="mname">${name}</span>
+      <div class="dual"><span class="was" style="width:${was===null?0:was}%"></span><span class="now" style="width:${now}%;background:${color};opacity:.85"></span></div>
+      <span>${fmt(now)} ${dh}</span></div>`);
+  };
+  G.founderActive.forEach(k=>{
+    const m=FOUNDER_METRICS[k];
+    addRow(m.name, G.snap.fActive.includes(k)?G.snap.founder[k]:null, G.founder[k], m.color, m.fmt);
+  });
+  G.boardActive.forEach(k=>{
+    const t=SQDCM.find(t=>t.key===k);
+    addRow(t.key+" · "+t.name, G.snap.bActive.includes(k)?G.snap.board[k]:null, G.board[k], "var(--teal)", v=>v);
+  });
+  // verdict
+  const fd=G.founderActive.filter(k=>G.snap.fActive.includes(k)).map(k=>G.founder[k]-G.snap.founder[k]);
+  const bd=G.boardActive.filter(k=>G.snap.bActive.includes(k)).map(k=>G.board[k]-G.snap.board[k]);
+  const all=[...fd,...bd]; const net=all.reduce((a,b)=>a+b,0);
+  const worst=Math.min(...all,0);
+  const verdict = net>=15 ? `${PLAYER.name}, the chapter ends stronger than it began. Pawar would call that a good month — and Pawar doesn't say that.`
+    : net>=0 ? `You held the line, ${PLAYER.name}. In manufacturing, holding the line while growing is quieter than glory — and rarer.`
+    : worst<=-10 ? `A bruising chapter, ${PLAYER.name}. Something gave way back there. The forge remembers — but it also reheats.`
+    : `A costly stretch, ${PLAYER.name}. Every founder has chapters they'd rewrite. The next page is still blank.`;
+  const isLast = G.ch>=CHAPTERS.length-1;
+  stage.innerHTML=`<div class="card report">
+    <div class="inner">
+      <div class="chapter-title">${ch.title} · Chapter Review</div>
+      <h2>Where you started → where you stand</h2>
+      <p class="story" style="font-size:12px;color:var(--muted);margin-bottom:6px">Grey bar = start of chapter · coloured bar = now</p>
+      ${rows.join("")}
+      <p class="verdict">${verdict}</p>
+      <button class="btn" onclick="advanceChapter()">${isLast?"See How the Story Ends →":"Open the Next Chapter →"}</button>
+    </div></div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function advanceChapter(){
+  G.ch++; G.sc=-1;
+  if(G.ch>=CHAPTERS.length){ ending(); return; }
+  showChapterIntro();
+}
+
+function gameOver(why, c){
+  const msg = why==="cash"
+    ? "The account hits zero. The bank's letter is polite and final. You sell the machines to a man who haggles over the lathe Pawar loved. Some dreams end not with a bang but with an auction."
+    : "One morning you simply cannot get out of the car in the workshop parking lot. The body keeps score, and yours has called the debt. The shutters come down — not for lack of money, but of fire.";
+  stage.innerHTML=`<div class="card gameover">
+    ${ART.workshop_gate}
+    <div class="inner">
+      <h2>■ The Story Ends Here</h2>
+      <p class="story">${c.outcome}</p>
+      <p class="story"><em>${msg}</em></p>
+      <p class="story">But founders are made of restarts.</p>
+      <button class="btn" onclick="location.reload()">Begin Again</button>
+    </div></div>`;
+}
+
+function ending(){
+  $("pill").textContent="Epilogue";
+  renderKPIs();
+  const allVals=[...G.founderActive.map(k=>G.founder[k]), ...G.boardActive.map(k=>G.board[k])];
+  const avg=Math.round(allVals.reduce((a,b)=>a+b,0)/allVals.length);
+  let title,text;
+  if(avg>=72){ title="The Legend of the Forge";
+    text="Business schools write the case study. The pigeon-filled workshop is preserved at the Nashik plant entrance — shutters, oil stains and all — with a plaque: <em>“Every great factory was once one person's unreasonable decision.”</em> Your SQDCM boards glow green across continents, but on Friday evenings you still walk a shop floor, picking up a part, feeling the finish, the way Pawar taught you."; }
+  else if(avg>=55){ title="The Builder";
+    text="Not every battle won, but the war — decisively. A global manufacturer stands where a rusty shutter once hung. People who joined as ITI kids now run plants. Whatever the exit numbers say, the truest balance sheet is this: a few thousand families, three towns, and one industry are different because you got fed up at the right moment."; }
+  else { title="The Survivor";
+    text="It was harder than the books said and lonelier than anyone warned. The company stands — scarred, real, yours. Some tiles on the board never turned green; some decisions still visit you at 3am. But you built a thing that exists, that employs, that ships. Most people never find out what they would do. You did."; }
+  const weak = SQDCM.filter(t=>G.boardActive.includes(t.key)).sort((a,b)=>G.board[a.key]-G.board[b.key])[0];
+  stage.innerHTML=`<div class="card">
+    ${ART.legacy}
+    <div class="inner">
+      <div class="chapter-title">Epilogue · ${PLAYER.name} · ${PLAYER.diff.name} mode · Overall ${avg}/100 · Weakest tile: ${weak.name} (${G.board[weak.key]})</div>
+      <div class="ending-title">${title}</div>
+      <p class="story">${text}</p>
+      <h2 style="margin-top:18px">Your Journey</h2>
+      <div class="timeline">${G.log.map(l=>`<div class="row"><span class="ch">${l.chapter.split("·")[0]}</span><span>${l.choice}</span></div>`).join("")}</div>
+      <button class="btn" onclick="location.reload()">Live It Again</button>
+    </div></div>`;
+}
+
+renderKPIs();
+showOnboarding();
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Founder's Forge — The Story Begins</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Patrick Hand',cursive;background:#d8d8d8;min-height:100vh;display:flex;justify-content:center;padding:20px 14px}
+  /* paper sheet on the desk */
+  .app{width:100%;max-width:900px;background:#fdfdfd;box-shadow:0 0 40px rgba(0,0,0,.25);padding:18px 16px 22px}
+  header{text-align:center;margin-bottom:16px}
+  h1{font-family:'Bangers',cursive;font-size:38px;letter-spacing:4px;color:#111}
+  h1 span{background:#111;color:#fff;padding:0 10px}
+  .sub{font-size:14px;letter-spacing:2px;color:#444;text-transform:uppercase}
+  .pageno{text-align:center;font-family:'Bangers',cursive;letter-spacing:4px;color:#333;font-size:14px;margin-bottom:12px}
+
+  /* PAGE = grid of panels */
+  .page{display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:fade .5s}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+  .pan{background:#fff;border:4px solid #000;position:relative;display:flex;flex-direction:column;
+    box-shadow:8px 8px 0 rgba(0,0,0,.35);overflow:hidden}
+  .pan.wide{grid-column:1 / -1}
+  .num{position:absolute;top:-3px;left:-3px;background:#000;color:#fff;font-family:'Bangers',cursive;
+    font-size:17px;letter-spacing:1px;padding:3px 12px;z-index:3}
+  .cap{margin:14px 16px 0 44px;border:2px solid #000;background:#fff;padding:7px 11px;font-size:15px;
+    line-height:1.4;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,.25);z-index:2}
+  .art{width:100%;display:block;flex:1;background:
+    radial-gradient(circle, rgba(0,0,0,.045) 1px, transparent 1.4px);
+    background-size:7px 7px}
+  .say{margin:0 14px 10px;border:2px solid #000;border-radius:14px;background:#fff;padding:6px 11px;
+    font-size:14.5px;line-height:1.35;position:relative;box-shadow:2px 2px 0 rgba(0,0,0,.2)}
+  .say::after{content:"";position:absolute;top:-11px;left:30px;border:6px solid transparent;border-bottom-color:#000}
+  .say .who{font-family:'Bangers',cursive;font-size:11px;letter-spacing:1px;color:#000;margin-right:6px}
+  .say.shout{border-width:3px;transform:rotate(-.6deg)}
+  .say.think{border-style:dashed;border-radius:20px}
+  .goto{margin-top:auto;border-top:3px solid #000;display:flex}
+  .goto .cell{flex:1;text-align:center;padding:8px 6px;font-family:'Bangers',cursive;letter-spacing:1px;font-size:15px;color:#111;background:#fff}
+  .goto .cell+ .cell{border-left:3px solid #000}
+  .goto button{all:unset;cursor:pointer;flex:1;text-align:center;padding:9px 6px;font-family:'Bangers',cursive;
+    letter-spacing:1px;font-size:16px;background:#111;color:#fff}
+  .goto button:hover{background:#c46a10}
+  .goto button.alt{background:#fff;color:#111;border-left:3px solid #000}
+  .goto button.alt:hover{background:#eee}
+
+  /* cover */
+  .cover{text-align:center;padding-bottom:0}
+  .cover .big-title{font-family:'Bangers',cursive;font-size:52px;letter-spacing:4px;color:#111;line-height:1.05;margin:14px 10px 4px;text-shadow:3px 3px 0 rgba(0,0,0,.25)}
+  .cover p{font-size:15.5px;color:#333;line-height:1.5;padding:0 26px;margin-bottom:8px}
+  .choose{display:flex;border-top:3px solid #000;margin-top:12px}
+  .choose button{all:unset;cursor:pointer;flex:1;padding:14px 10px;text-align:center;font-family:'Patrick Hand',cursive}
+  .choose button:hover{background:#f1e8d4}
+  .choose button+button{border-left:3px solid #000}
+  .choose .glabel{font-family:'Bangers',cursive;font-size:20px;letter-spacing:2px;display:block;color:#111}
+  .choose .gdesc{font-size:13.5px;color:#444;line-height:1.3}
+  .choose .icon{font-size:30px;display:block}
+
+  /* cover form */
+  .flabel{font-family:'Bangers',cursive;font-size:14px;letter-spacing:2px;margin:14px 0 6px;color:#111}
+  #pname{width:100%;border:3px solid #000;padding:9px 12px;font-family:'Patrick Hand',cursive;font-size:16px;outline:none;box-shadow:3px 3px 0 rgba(0,0,0,.25)}
+  .orow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  .fopt{all:unset;cursor:pointer;border:2.5px solid #000;background:#fff;padding:8px 10px;text-align:center;
+    font-family:'Patrick Hand',cursive;font-size:14.5px;line-height:1.3;box-shadow:2px 2px 0 rgba(0,0,0,.25);color:#111}
+  .fopt:hover{background:#f1e8d4}
+  .fopt.selopt{background:#111;color:#fff}
+  /* svg anims */
+  .rainfall{animation:rainfall 1s linear infinite}
+  @keyframes rainfall{from{transform:translateY(-8px)}to{transform:translateY(12px)}}
+  .smoke{animation:smoke 3s ease-in-out infinite}
+  @keyframes smoke{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:.75;transform:translateY(-4px)}}
+  .bob{animation:bob 3.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .blink{animation:blink 1.5s steps(2) infinite}
+  @keyframes blink{50%{opacity:.15}}
+  .pulse2{transform-origin:center;transform-box:fill-box;animation:pulse2 2s ease-in-out infinite}
+  @keyframes pulse2{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  @media(max-width:560px){.page{grid-template-columns:1fr}.pan.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>THE FOUNDER'S <span>FORGE</span></h1>
+    <div class="sub">— how the story begins —</div>
+  </header>
+  <div class="pageno" id="pageno"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+// ============ B&W INK SKETCHES (minimal) ============
+const K='stroke="#111" stroke-width="2.6" fill="none" stroke-linecap="round"';
+const KT='stroke="#111" stroke-width="1.7" fill="none" stroke-linecap="round"';
+function svg(inner,vb="0 0 300 170"){return `<svg class="art" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;}
+
+const ART={
+// city in rain
+city:svg(`
+  <rect x="50" y="60" width="40" height="70" ${K}/>
+  <rect x="105" y="35" width="50" height="95" ${K}/>
+  <rect x="170" y="70" width="38" height="60" ${K}/>
+  <rect x="222" y="50" width="44" height="80" ${K}/>
+  <path d="M115 50 h10 m10 0 h10 M115 70 h10 m10 0 h10 M115 90 h10 m10 0 h10" ${KT}/>
+  <path d="M232 65 h8 m10 0 h8 M232 85 h8 m10 0 h8" ${KT}/>
+  <g class="rainfall"><path d="M60 12 l-4 11 M120 6 l-4 11 M180 14 l-4 11 M240 8 l-4 11 M280 16 l-4 11 M30 20 l-4 11" ${KT}/></g>
+  <path d="M30 132 h250" ${K}/>
+`),
+// two people, table, two mugs (bar)
+bar:svg(`
+  <circle cx="95" cy="55" r="13" ${K}/>
+  <path d="M95 68 v34 M95 76 l-16 13 M95 76 l14 10 M95 102 l-11 26 M95 102 l11 26" ${K}/>
+  <circle cx="205" cy="55" r="13" ${K}/>
+  <path d="M205 68 v34 M205 76 l-16 12 M205 76 l16 13 M205 102 l-11 26 M205 102 l11 26" ${K}/>
+  <path d="M120 95 h60 M126 95 v33 M174 95 v33" ${K}/>
+  <g class="bob"><path d="M134 78 h12 v16 h-12 z M146 82 q7 0 7 6 q0 6 -7 6" ${K}/></g>
+  <path d="M156 78 h12 v16 h-12 z" ${KT}/>
+  <path d="M30 130 h240" ${K}/>
+`),
+// two people, table, two cups (café)
+cafe:svg(`
+  <circle cx="95" cy="55" r="13" ${K}/>
+  <path d="M95 68 v34 M95 76 l-16 13 M95 76 l14 10 M95 102 l-11 26 M95 102 l11 26" ${K}/>
+  <circle cx="205" cy="55" r="13" ${K}/>
+  <path d="M205 68 v34 M205 76 l-16 12 M205 76 l16 13 M205 102 l-11 26 M205 102 l11 26" ${K}/>
+  <path d="M120 95 h60 M126 95 v33 M174 95 v33" ${K}/>
+  <path d="M134 84 h12 v8 q0 4 -6 4 q-6 0 -6 -4 z M146 86 q6 1 0 7" ${K}/>
+  <path d="M158 84 h11 v8 q0 4 -5.5 4 q-5.5 0 -5.5 -4 z" ${KT}/>
+  <g class="smoke"><path d="M139 76 q3 -6 -1 -10 M163 76 q3 -5 -1 -9" ${KT}/></g>
+  <path d="M30 130 h240" ${K}/>
+`),
+// face to face closeup — two profiles
+talk:svg(`
+  <path d="M85 50 q-18 4 -18 26 q0 20 16 24 l-2 16" ${K}/>
+  <circle cx="92" cy="46" r="14" ${K}/>
+  <path d="M215 50 q18 4 18 26 q0 20 -16 24 l2 16" ${K}/>
+  <circle cx="208" cy="46" r="14" ${K}/>
+  <g class="blink"><path d="M125 70 h12 m8 0 h12 m8 0 h12" ${KT}/></g>
+  <path d="M30 130 h240" ${K}/>
+`),
+// office cubicle
+office:svg(`
+  <path d="M60 110 h180" ${K}/>
+  <path d="M75 110 v-35 h150 v35" ${K}/>
+  <rect x="115" y="40" width="56" height="34" ${K}/>
+  <path d="M139 74 v8 m-12 0 h24" ${K}/>
+  <g class="blink"><path d="M122 50 h40 m-40 8 h28 m-28 8 h34" ${KT}/></g>
+  <circle cx="208" cy="50" r="11" ${K}/>
+  <path d="M208 61 q-2 12 -8 13 M203 70 l-9 7 M203 66 l13 6" ${K}/>
+  <circle cx="262" cy="30" r="12" ${KT}/><g class="pulse2"><path d="M262 23 v7 l4 3" ${KT}/></g>
+  <path d="M30 130 h240" ${K}/>
+`),
+// car in rain
+car:svg(`
+  <g class="bob"><path d="M70 100 q6 -22 32 -24 q10 -14 36 -14 q26 0 34 14 q28 2 32 24 z" ${K}/>
+  <circle cx="100" cy="103" r="9" ${K}/><circle cx="190" cy="103" r="9" ${K}/>
+  <path d="M120 78 h50" ${KT}/></g>
+  <g class="rainfall"><path d="M60 16 l-4 11 M110 8 l-4 11 M170 18 l-4 11 M230 10 l-4 11 M270 20 l-4 11" ${KT}/></g>
+  <path d="M30 114 h240" ${K}/>
+`),
+// shuttered workshop, FOR SALE
+workshop:svg(`
+  <path d="M55 125 V62 L150 38 L245 62 V125" ${K}/>
+  <path d="M82 125 V72 h136 v53" ${K}/>
+  <path d="M82 82 h136 M82 94 h136 M82 106 h136 M82 118 h136" ${KT}/>
+  <g class="bob"><rect x="180" y="46" width="58" height="18" ${K}/>
+  <text x="186" y="60" fill="#111" font-size="10" font-family="monospace">FOR SALE</text></g>
+  <g class="rainfall"><path d="M40 14 l-4 11 M270 12 l-4 11" ${KT}/></g>
+  <path d="M30 128 h245" ${K}/>
+`),
+// dinner table, three figures, lamp
+dinner:svg(`
+  <g class="blink"><path d="M150 8 v12 M138 20 h24 l-5 11 h-14 z" ${KT}/></g>
+  <path d="M85 95 h130 M93 95 v32 M207 95 v32" ${K}/>
+  <circle cx="105" cy="62" r="11" ${K}/><path d="M105 73 v20 M105 79 l-12 9 M105 79 l12 9" ${K}/>
+  <circle cx="152" cy="60" r="10" ${K}/><path d="M152 70 v22 M152 76 l-11 8 M152 76 l11 8" ${KT}/>
+  <circle cx="196" cy="63" r="9" ${K}/><path d="M196 72 v21 M196 78 l-10 7 M196 78 l10 7" ${KT}/>
+  <path d="M120 100 h14 m26 0 h14" ${KT}/>
+  <path d="M30 130 h240" ${K}/>
+`),
+// raised fist / declaration
+declare:svg(`
+  <circle cx="150" cy="55" r="15" ${K}/>
+  <path d="M150 70 v40 M150 80 l-22 14 M150 78 l24 -16 M150 110 l-14 22 M150 110 l14 22" ${K}/>
+  <circle cx="178" cy="58" r="6" ${K}/>
+  <g class="pulse2"><path d="M196 40 l8 -8 M204 52 l10 -4 M188 32 l4 -10" ${K}/></g>
+  <path d="M30 134 h240" ${K}/>
+`),
+// phone with message
+phone:svg(`
+  <rect x="115" y="25" width="70" height="110" rx="8" ${K}/>
+  <path d="M140 32 h20" ${KT}/>
+  <g class="bob"><rect x="125" y="48" width="50" height="24" rx="6" ${KT}/>
+  <path d="M131 56 h38 m-38 8 h26" ${KT}/></g>
+  <rect x="125" y="80" width="50" height="20" rx="6" ${KT}/>
+  <path d="M131 88 h32" ${KT}/>
+  <g class="blink"><circle cx="150" cy="120" r="6" ${K}/></g>
+`),
+// spark / forge
+spark:svg(`
+  <g class="pulse2"><path d="M150 28 l7 19 21 -10 -7 20 22 4 -19 12 14 17 -22 -5 0 22 -16 -17 -16 17 0 -22 -22 5 14 -17 -19 -12 22 -4 -7 -20 21 10 z" ${K}/></g>
+  <path d="M85 138 q28 -24 65 -19 M215 138 q-28 -24 -65 -19" ${KT}/>
+  <path d="M60 145 h180" ${K}/>
+`)
+};
+
+// ============ STORY ============
+function makePages(g){
+  const isM=g==="m";
+  const FRIEND=isM?"RAVI":"MEERA";
+  const drinkArt=isM?ART.bar:ART.cafe;
+  const place=isM?"A Friday-night bar. Pune.":"A Saturday-morning café. Pune.";
+  return [
+  // -------- PAGE 1 --------
+  {panels:[
+    {n:"01",art:ART.city,cap:"Pune. It has rained all week. Somewhere in this city, a decision is seventeen years overdue."},
+    {n:"02",art:drinkArt,cap:place,say:[["YOU","Another reorg. My project — renamed, repackaged, presented by someone else."]]},
+    {n:"03",art:ART.talk,cap:"Old engineering classmates. Same table. Same conversation, three years running.",say:[[FRIEND,"You've been saying this since 2023. Same sigh, same "+(isM?"beer":"coffee")+"."]]},
+    {n:"04",art:ART.declare,cap:"But tonight, something is different.",say:[["YOU","My grandfather was a toolmaker. My hands remember things my job never asked of them.","shout"]],
+     goto:{label:"Go to 05",next:true}}
+  ]},
+  // -------- PAGE 2 --------
+  {panels:[
+    {n:"05",art:ART.office,cap:"Monday. The badge. The desk. The slow hourglass of someone else's dream."},
+    {n:"06",art:ART.office,cap:"Meetings about meetings.",say:[["YOU","(Is this what hands are for?)","think"]]},
+    {n:"07",art:ART.car,cap:"Driving home through the rain, the usual route. Then —",say:[["YOU","(...stop the car.)","think"]]},
+    {n:"08",art:ART.workshop,cap:"The old Kadam Engineering workshop. Shutters down. A FOR SALE sign rusting in the rain. Tonight, it looks like a door.",
+     goto:{label:"Go to 09",next:true}}
+  ]},
+  // -------- PAGE 3 --------
+  {panels:[
+    {n:"09",art:ART.dinner,cap:"That night, at dinner. Saying it out loud makes it real.",say:[["YOU","I'm going to buy that workshop. I'm going to build something — with my own hands, under my own name.","shout"]]},
+    {n:"10",art:ART.dinner,cap:"The table goes quiet. Which, in families, is how the biggest yeses begin.",say:[["FAMILY","...","think"]]},
+    {n:"11",art:ART.phone,cap:"11:47 PM.",say:[[FRIEND,"You're actually doing it, "+(PROFILE.name||"aren't you")+"?! Then do it PROPERLY. Cash runs out fast — resolve runs out faster. See you on the floor. 🔧"]]},
+    {n:"12",art:ART.spark,cap:"Every forge starts cold. Yours lights tomorrow. What happens next... is up to you.",
+     goto:{label:"START THE GAME",start:true}}
+  ]}
+];}
+
+// ============ ENGINE ============
+const $=id=>document.getElementById(id);
+let PAGES=null,p=0;
+
+// profile collected here, handed to the game via URL
+const PROFILE={name:"",exp:null,field:null,role:null,g:null};
+function pickOpt(group,idx,btn){
+  PROFILE[group]=idx;
+  [...btn.parentElement.children].forEach(b=>b.classList.remove("selopt"));
+  btn.classList.add("selopt");
+  checkReady();
+}
+function checkReady(){
+  PROFILE.name=$("pname").value.trim();
+  const ok=PROFILE.name.length>0&&PROFILE.exp!==null&&PROFILE.field!==null&&PROFILE.role!==null&&PROFILE.g!==null;
+  $("beginBtn").disabled=!ok;$("beginBtn").style.opacity=ok?1:.35;
+}
+function showCover(){
+  $("pageno").textContent="PROLOGUE · WHO IS OUR FOUNDER?";
+  $("stage").innerHTML=`<div class="page"><div class="pan wide cover">
+    <span class="num">00</span>
+    ${ART.spark}
+    <div class="big-title">EVERY FORGE<br>STARTS COLD.</div>
+    <p>Before the machines, before the factory, before the first order —<br>
+    there is just a person, fed up at exactly the right moment.</p>
+    <div style="text-align:left;padding:0 26px 18px">
+      <div class="flabel">YOUR NAME</div>
+      <input type="text" id="pname" maxlength="20" placeholder="What should the story call you?" oninput="checkReady()">
+      <div class="flabel">YEARS IN THE TRENCHES</div>
+      <div class="orow">
+        <button class="fopt" onclick="pickOpt('exp',0,this)">0–5 yrs</button>
+        <button class="fopt" onclick="pickOpt('exp',1,this)">5–15 yrs</button>
+        <button class="fopt" onclick="pickOpt('exp',2,this)">15+ yrs</button>
+      </div>
+      <div class="flabel">YOUR FIELD</div>
+      <div class="orow">
+        <button class="fopt" onclick="pickOpt('field',0,this)">Manufacturing / Ops</button>
+        <button class="fopt" onclick="pickOpt('field',1,this)">Engineering / R&D</button>
+        <button class="fopt" onclick="pickOpt('field',2,this)">Business / Finance</button>
+        <button class="fopt" onclick="pickOpt('field',3,this)">Other / Student</button>
+      </div>
+      <div class="flabel">AND HONESTLY... WHO ARE YOU?</div>
+      <div class="orow">
+        <button class="fopt" onclick="pickOpt('role',0,this)">CEO at heart</button>
+        <button class="fopt" onclick="pickOpt('role',1,this)">A manager — I run things</button>
+        <button class="fopt" onclick="pickOpt('role',2,this)">A great individual contributor</button>
+        <button class="fopt" onclick="pickOpt('role',3,this)">Still figuring it out</button>
+      </div>
+      <div class="flabel">OUR FOUNDER IS...</div>
+      <div class="orow">
+        <button class="fopt" onclick="pickOpt('g',0,this)">🍺 HIM — a man, a bar, an old friend</button>
+        <button class="fopt" onclick="pickOpt('g',1,this)">☕ HER — a woman, a café, an old friend</button>
+      </div>
+      <div style="text-align:center;margin-top:18px">
+        <button id="beginBtn" disabled style="all:unset;cursor:pointer;background:#111;color:#fff;font-family:'Bangers',cursive;font-size:18px;letter-spacing:2px;padding:10px 32px;box-shadow:4px 4px 0 rgba(0,0,0,.35);opacity:.35" onclick="start()">OPEN PAGE ONE →</button>
+      </div>
+    </div>
+  </div></div>`;
+}
+function start(){PAGES=makePages(PROFILE.g===0?"m":"f");p=0;showPage();}
+function gameURL(){
+  return "founders-forge-v3.html?name="+encodeURIComponent(PROFILE.name)
+    +"&exp="+PROFILE.exp+"&field="+PROFILE.field+"&role="+PROFILE.role
+    +"&g="+(PROFILE.g===0?"m":"f");
+}
+function say(list){if(!list)return"";
+  return list.map(s=>{const cls=["say",...s.slice(2)].join(" ");
+    return `<div class="${cls}"><span class="who">${s[0]}:</span>${s[1]}</div>`;}).join("");}
+function showPage(){
+  const pg=PAGES[p];
+  $("pageno").textContent=`PAGE ${p+1} OF ${PAGES.length}`;
+  $("stage").innerHTML=`<div class="page">`+pg.panels.map(pn=>{
+    let footer="";
+    if(pn.goto){
+      const backBtn=p>0?`<button class="alt" onclick="p--;showPage()">← BACK</button>`:"";
+      footer=`<div class="goto">${backBtn}${
+        pn.goto.start
+        ?`<button onclick="location.href=gameURL()">▶ ${pn.goto.label}</button>`
+        :`<button onclick="p++;showPage()">${pn.goto.label} →</button>`}</div>`;
+    }
+    return `<div class="pan">
+      <span class="num">${pn.n}</span>
+      <div class="cap">${pn.cap}</div>
+      ${pn.art}
+      ${say(pn.say)}
+      ${footer}
+    </div>`;
+  }).join("")+`</div>`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+showCover();
+</script>
+</body>
+</html>

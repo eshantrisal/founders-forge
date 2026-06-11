@@ -1,0 +1,1 @@
+This project is for building a strategy game on manfacturing. Intent is to use it to circulate to leaders. 

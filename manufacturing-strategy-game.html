@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plant Command — Manufacturing Strategy Game</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222b38; --border:#2e3a4a;
+    --text:#e8edf2; --muted:#8d9aa8; --accent:#f0a132; --green:#3ecf8e;
+    --red:#ef5e5e; --blue:#5aa6f0; --purple:#a98df0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:24px}
+  .app{width:100%;max-width:860px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  h1{font-size:22px;letter-spacing:.5px}
+  h1 span{color:var(--accent)}
+  .round-pill{background:var(--panel);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--muted)}
+  /* KPI bar */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+  .kpi .val{font-size:20px;font-weight:600}
+  .bar{height:6px;background:var(--panel2);border-radius:3px;margin-top:8px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
+  .delta{font-size:12px;margin-left:6px}
+  .up{color:var(--green)} .down{color:var(--red)}
+  /* Cards */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:16px}
+  .card h2{font-size:18px;margin-bottom:10px;color:var(--accent)}
+  .situation{font-size:15px;line-height:1.6;color:var(--text);margin-bottom:20px}
+  .choices{display:grid;gap:10px}
+  .choice{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font-size:14px;line-height:1.45;transition:border-color .15s,transform .15s}
+  .choice:hover{border-color:var(--accent);transform:translateX(4px)}
+  .choice b{display:block;margin-bottom:2px}
+  .tag{font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:10px;float:right}
+  .tag.aggressive_growth{background:#3a2a14;color:var(--accent)}
+  .tag.quality_focus{background:#15302a;color:var(--green)}
+  .tag.cost_cutting{background:#331c1c;color:var(--red)}
+  .tag.balanced{background:#1c2a3a;color:var(--blue)}
+  /* Outcome */
+  .outcome{display:none}
+  .outcome.show{display:block;animation:fade .4s}
+  .outcome p{line-height:1.6;margin-bottom:16px}
+  .outcome .effects{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;font-size:13px}
+  .btn{background:var(--accent);color:#1a1205;border:none;border-radius:8px;padding:11px 26px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  /* Debrief */
+  .profile{font-size:24px;color:var(--accent);margin:6px 0 14px}
+  .debrief li{margin:0 0 10px 18px;line-height:1.5;font-size:14px}
+  .hist{display:grid;gap:8px;margin:16px 0}
+  .hist .row{display:flex;justify-content:space-between;font-size:13px;background:var(--panel2);padding:8px 12px;border-radius:8px}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>PLANT <span>COMMAND</span> <small style="font-size:12px;color:var(--muted);font-weight:400">· Automotive India · Executive Edition</small></h1>
+    <div class="round-pill" id="roundPill">Round 1 / 5</div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card" id="introCard">
+    <h2>Your Mandate</h2>
+    <p class="situation">You are the new Managing Director of <b>Arjun Auto Components</b>, a Tier-1 supplier in Pune making transmission parts for major OEMs. The board expects growth, customers demand quality, and margins are under pressure. You face <b>5 strategic decisions</b>. Every choice is a trade-off — there is no perfect answer. Manage <b>Growth, Quality, Cost Efficiency, and Stability</b>. Let any one collapse and the business suffers.</p>
+    <button class="btn" onclick="start()">Take Charge</button>
+  </div>
+
+  <div class="card" id="scenarioCard" style="display:none">
+    <h2 id="scTitle"></h2>
+    <p class="situation" id="scSituation"></p>
+    <div class="choices" id="scChoices"></div>
+    <div class="outcome" id="scOutcome">
+      <p id="outText"></p>
+      <div class="effects" id="outEffects"></div>
+      <button class="btn" id="nextBtn" onclick="nextRound()">Next Decision →</button>
+    </div>
+  </div>
+
+  <div class="card" id="endCard" style="display:none">
+    <h2>Board Review — End of Year</h2>
+    <div class="profile" id="profileName"></div>
+    <p class="situation" id="profileDesc"></p>
+    <div class="hist" id="history"></div>
+    <h2 style="margin-top:10px">Workshop Debrief</h2>
+    <ul class="debrief" id="debriefList"></ul>
+    <button class="btn" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ============ SCENARIO DATA ============
+// Swap this array with generated JSON (same schema) to change content.
+const SCENARIOS = [
+  {
+    "title": "The OEM Mega-Order",
+    "situation": "Your largest OEM customer offers a 3-year contract for a new EV transmission line — 40% more volume, but it demands a ₹120 crore capex and aggressive pricing. Your current lines are already at 85% utilisation.",
+    "choices": [
+      {"label":"Sign the full contract and build a new line on borrowed capital","effect_type":"aggressive_growth","outcome":"Order book swells, but debt servicing squeezes cash and the rushed line ramps with teething defects."},
+      {"label":"Accept partial volume, conditional on a joint quality ramp-up with the OEM","effect_type":"quality_focus","outcome":"Slower revenue growth, but the OEM rates you a preferred supplier after a flawless PPAP."},
+      {"label":"Decline new capex; squeeze more output from existing lines via overtime","effect_type":"cost_cutting","outcome":"Margins hold, but overworked lines see rising rejections and the OEM quietly courts a rival."},
+      {"label":"Phase the investment: lease one line now, commit fully if year-one targets hit","effect_type":"balanced","outcome":"Moderate growth with capped risk — though the OEM grumbles about your hedged commitment."}
+    ]
+  },
+  {
+    "title": "Supplier Concentration Risk",
+    "situation": "70% of your forging inputs come from one Aurangabad supplier, now hit by labour unrest. Deliveries are slipping 5 days. Your line-stoppage penalty clause with OEMs is brutal.",
+    "choices": [
+      {"label":"Acquire a minority stake in the supplier to control and expand their capacity","effect_type":"aggressive_growth","outcome":"Supply secured and capacity grows, but the deal drains reserves and you inherit their union dispute."},
+      {"label":"Dual-source with a certified second supplier, even at 8% higher input cost","effect_type":"quality_focus","outcome":"Premium pricing hurts margin, but zero line stoppages and audit-grade traceability win OEM trust."},
+      {"label":"Negotiate hard with the existing supplier — threaten to pull volume for price cuts","effect_type":"cost_cutting","outcome":"You win a discount, but the strained relationship means you're last in queue when their capacity tightens."},
+      {"label":"Build 3 weeks of strategic buffer stock while slowly qualifying a backup","effect_type":"balanced","outcome":"Inventory carrying cost rises, but production never stops while options stay open."}
+    ]
+  },
+  {
+    "title": "The Quality Escape",
+    "situation": "A batch of 4,000 gear assemblies shipped last month shows micro-cracks in field returns. The OEM hasn't formally flagged it yet. A full recall costs ₹6 crore; staying silent risks a line-down claim ten times that.",
+    "choices": [
+      {"label":"Proactively recall, absorb the cost, and pitch the OEM your expanded capacity as the fix","effect_type":"aggressive_growth","outcome":"The bold transparency wins respect and new volume — but the quarter's P&L takes a visible hit."},
+      {"label":"Recall immediately, run 8D root-cause, and invest in inline crack-detection sensors","effect_type":"quality_focus","outcome":"Expensive quarter, but defect escapes drop to near-zero and your CAPA becomes an OEM case study."},
+      {"label":"Quietly screen remaining stock and replace only confirmed-defective units","effect_type":"cost_cutting","outcome":"Cost contained for now — but a field failure later would expose the cover-up and devastate trust."},
+      {"label":"Notify the OEM, jointly scope a targeted recall of the affected lot only","effect_type":"balanced","outcome":"Shared decision shields the relationship; costs land mid-range and the issue closes cleanly."}
+    ]
+  },
+  {
+    "title": "Automation vs. Workforce",
+    "situation": "Robotic welding cells could cut your per-unit labour cost 30% and lift consistency — but they'd displace 120 experienced workers in a plant with a strong union and a state election approaching.",
+    "choices": [
+      {"label":"Automate fast and redeploy displaced workers into a new second shift for growth volume","effect_type":"aggressive_growth","outcome":"Output jumps, but the rushed redeployment strains supervision and the union files grievances."},
+      {"label":"Automate gradually, pairing each cell with retrained operators as quality technicians","effect_type":"quality_focus","outcome":"Slower payback, but first-pass yield climbs and the union becomes a transformation partner."},
+      {"label":"Automate aggressively and offer VRS packages to shrink headcount","effect_type":"cost_cutting","outcome":"Cost per unit drops sharply — but a 3-day flash strike and local press coverage bruise the brand."},
+      {"label":"Pilot 2 cells, publish transparent retraining commitments, scale based on results","effect_type":"balanced","outcome":"Modest savings now; goodwill and data position you to scale automation without conflict."}
+    ]
+  },
+  {
+    "title": "The Export Opportunity",
+    "situation": "A European Tier-1 wants you as their India sourcing base — 25% revenue upside but IATF audits, carbon reporting, and euro pricing exposure. Your plant has never exported.",
+    "choices": [
+      {"label":"Commit fully: dedicate a line, hire an export team, target 3 European customers in 18 months","effect_type":"aggressive_growth","outcome":"Revenue diversifies fast, but compliance gaps surface in the first audit and fixes are costly."},
+      {"label":"Invest first in IATF certification and ESG systems, then onboard the customer properly","effect_type":"quality_focus","outcome":"A 9-month delay frustrates the customer, but you pass the audit clean and pricing power follows."},
+      {"label":"Serve them from existing lines with minimal new investment, treating it as overflow business","effect_type":"cost_cutting","outcome":"Cheap entry, but mixed-line scheduling chaos hurts both domestic and export delivery performance."},
+      {"label":"Start with one product family, hedge currency, and review scale-up after two quarters","effect_type":"balanced","outcome":"Steady learning curve; smaller upside now but a durable export foundation takes shape."}
+    ]
+  }
+];
+
+// ============ GAME ENGINE ============
+const METRICS = [
+  {key:"growth",   name:"Growth",         color:"var(--accent)"},
+  {key:"quality",  name:"Quality",        color:"var(--green)"},
+  {key:"cost",     name:"Cost Efficiency",color:"var(--blue)"},
+  {key:"stability",name:"Stability",      color:"var(--purple)"}
+];
+
+// effect_type → metric deltas
+const EFFECTS = {
+  aggressive_growth:{growth:+14, quality:-5, cost:-6, stability:-8},
+  quality_focus:    {growth:-3,  quality:+14, cost:-5, stability:+6},
+  cost_cutting:     {growth:-5,  quality:-7, cost:+14, stability:-4},
+  balanced:         {growth:+4,  quality:+4, cost:+3,  stability:+6}
+};
+
+const TAGNAMES = {aggressive_growth:"Growth",quality_focus:"Quality",cost_cutting:"Cost",balanced:"Balanced"};
+
+let state = {round:0, scores:{growth:50,quality:50,cost:50,stability:50}, picks:[]};
+
+const $ = id => document.getElementById(id);
+
+function renderKPIs(deltas={}){
+  $("kpis").innerHTML = METRICS.map(m=>{
+    const v = state.scores[m.key];
+    const d = deltas[m.key]||0;
+    const dHtml = d ? `<span class="delta ${d>0?'up':'down'}">${d>0?'+':''}${d}</span>` : "";
+    return `<div class="kpi"><div class="label">${m.name}</div>
+      <div class="val">${v}${dHtml}</div>
+      <div class="bar"><i style="width:${v}%;background:${m.color}"></i></div></div>`;
+  }).join("");
+}
+
+function start(){
+  $("introCard").style.display="none";
+  showScenario();
+}
+
+function showScenario(){
+  const sc = SCENARIOS[state.round];
+  $("roundPill").textContent = `Round ${state.round+1} / ${SCENARIOS.length}`;
+  $("scenarioCard").style.display="block";
+  $("scTitle").textContent = sc.title;
+  $("scSituation").textContent = sc.situation;
+  $("scOutcome").classList.remove("show");
+  $("scChoices").style.display="grid";
+  $("scChoices").innerHTML = sc.choices.map((c,i)=>
+    `<button class="choice" onclick="pick(${i})"><span class="tag ${c.effect_type}">${TAGNAMES[c.effect_type]}</span><b>${c.label}</b></button>`
+  ).join("");
+  renderKPIs();
+  $("scenarioCard").scrollIntoView({behavior:"smooth"});
+}
+
+function pick(i){
+  const sc = SCENARIOS[state.round];
+  const c = sc.choices[i];
+  state.picks.push({title:sc.title, label:c.label, type:c.effect_type});
+  const eff = EFFECTS[c.effect_type];
+  const deltas = {};
+  for(const k in eff){
+    // small randomness ±2 so repeated plays differ
+    const d = eff[k] + (Math.floor(Math.random()*5)-2);
+    deltas[k]=d;
+    state.scores[k] = Math.max(0, Math.min(100, state.scores[k]+d));
+  }
+  renderKPIs(deltas);
+  $("scChoices").style.display="none";
+  $("outText").innerHTML = `<b>Outcome:</b> ${c.outcome}`;
+  $("outEffects").innerHTML = METRICS.map(m=>{
+    const d = deltas[m.key];
+    return `<span class="${d>=0?'up':'down'}">${m.name} ${d>=0?'+':''}${d}</span>`;
+  }).join("");
+  $("nextBtn").textContent = state.round===SCENARIOS.length-1 ? "See Board Review →" : "Next Decision →";
+  $("scOutcome").classList.add("show");
+}
+
+function nextRound(){
+  state.round++;
+  if(state.round < SCENARIOS.length){ showScenario(); }
+  else { endGame(); }
+}
+
+function endGame(){
+  $("scenarioCard").style.display="none";
+  $("roundPill").textContent = "Year End";
+  renderKPIs();
+
+  // dominant style
+  const counts = {};
+  state.picks.forEach(p=>counts[p.type]=(counts[p.type]||0)+1);
+  const dominant = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  const PROFILES = {
+    aggressive_growth:["The Empire Builder","You chase scale boldly. Growth came — ask whether quality and stability can keep funding the next bet."],
+    quality_focus:["The Craftsman MD","You build reputation as an asset. Customers trust you — the challenge is converting that trust into faster growth."],
+    cost_cutting:["The Margin Hawk","You protect every rupee. Efficient — but watch whether short-term savings are borrowing against quality and morale."],
+    balanced:["The Steady Hand","You hedge intelligently. Resilient — but boards sometimes ask whether caution left opportunity on the table."]
+  };
+  const [pName,pDesc] = PROFILES[dominant];
+  $("profileName").textContent = pName;
+
+  const s = state.scores;
+  const avg = Math.round((s.growth+s.quality+s.cost+s.stability)/4);
+  const low = METRICS.reduce((a,m)=>s[m.key]<s[a.key]?m:a,METRICS[0]);
+  $("profileDesc").textContent = `${pDesc} Overall plant health: ${avg}/100. Weakest dimension: ${low.name} (${s[low.key]}).`;
+
+  $("history").innerHTML = state.picks.map((p,i)=>
+    `<div class="row"><span>${i+1}. ${p.title}</span><span class="tag ${p.type}" style="float:none">${TAGNAMES[p.type]}</span></div>`
+  ).join("");
+
+  $("debriefList").innerHTML = [
+    "Which decision felt hardest, and what made the trade-off uncomfortable?",
+    "Did your team optimise one metric at the expense of another? Was that deliberate?",
+    `Your weakest dimension was <b>${low.name}</b> — what early signal would have warned you in a real plant?`,
+    "Where would a competitor have chosen differently — and would they have won?",
+    "Which of these five scenarios is closest to a decision your organisation faces today?"
+  ].map(q=>`<li>${q}</li>`).join("");
+
+  $("endCard").style.display="block";
+  $("endCard").scrollIntoView({behavior:"smooth"});
+}
+
+renderKPIs();
+</script>
+</body>
+</html>

@@ -252,26 +252,16 @@ function makePages(g){
   return [
   // -------- PAGE 1 --------
   {panels:[
-    {n:"01",art:ART.city,cap:"Pune. It has rained all week. Somewhere in this city, a decision is "+YRS+" years overdue."},
-    {n:"02",art:drinkArt,cap:place,say:[["YOU",GRIPE]]},
-    {n:"03",art:ART.talk,cap:"Old engineering classmates. Same table. Same conversation, "+(PROFILE.exp===0?"every month since college":"three years running")+".",say:[[FRIEND,"You've been saying this "+(PROFILE.exp===0?"since our final year project":"since 2023")+". Same sigh, same "+(isM?"beer":"coffee")+"."]]},
-    {n:"04",art:ART.declare,cap:"But tonight, something is different.",say:[["YOU","My grandfather was a toolmaker. My hands remember things my job never asked of them.","shout"]],
-     goto:{label:"Go to 05",next:true}}
+    {n:"01",art:drinkArt,cap:place+" A decision, "+YRS+" years overdue.",say:[["YOU",GRIPE],[FRIEND,"You've been saying this "+(PROFILE.exp===0?"since our final year project":"for three years")+". Same sigh, same "+(isM?"beer":"coffee")+".","r"]]},
+    {n:"02",art:ART.declare,cap:"But tonight is different.",say:[["YOU","My grandfather was a toolmaker. My hands remember things my job never asked of them.","shout"]]},
+    {n:"03",art:ART.workshop,cap:"Driving home through the rain — the old Kadam Engineering workshop. Shutters down. FOR SALE. Tonight, it looks like a door.",
+     goto:{label:"Go to 04",next:true}}
   ]},
   // -------- PAGE 2 --------
   {panels:[
-    {n:"05",art:ART.office,cap:"Monday. The badge. The desk. The slow hourglass of someone else's dream."},
-    {n:"06",art:ART.office,cap:"Meetings about meetings.",say:[["YOU","(Is this what hands are for?)","think"]]},
-    {n:"07",art:ART.car,cap:"Driving home through the rain, the usual route. Then —",say:[["YOU","(...stop the car.)","think"]]},
-    {n:"08",art:ART.workshop,cap:"The old Kadam Engineering workshop. Shutters down. A FOR SALE sign rusting in the rain. Tonight, it looks like a door.",
-     goto:{label:"Go to 09",next:true}}
-  ]},
-  // -------- PAGE 3 --------
-  {panels:[
-    {n:"09",art:ART.dinner,cap:"That night, at dinner. Saying it out loud makes it real.",say:[["YOU","I'm going to buy that workshop. I'm going to build something — with my own hands, under my own name.","shout"]]},
-    {n:"10",art:ART.dinner,cap:"The table goes quiet. Which, in families, is how the biggest yeses begin.",say:[["FAMILY","...","think"]]},
-    {n:"11",art:ART.phone,cap:"11:47 PM.",say:[[FRIEND,"You're actually doing it, "+(PROFILE.name||"aren't you")+"?! Then do it PROPERLY. Cash runs out fast — resolve runs out faster. See you on the floor. 🔧"]]},
-    {n:"12",art:ART.spark,cap:"Every forge starts cold. Yours lights tomorrow. What happens next... is up to you.",
+    {n:"04",art:ART.dinner,cap:"That night, at dinner. Saying it out loud makes it real. The table goes quiet — which, in families, is how the biggest yeses begin.",say:[["YOU","I'm buying that workshop. I'm going to build something — with my own hands, under my own name.","shout"]]},
+    {n:"05",art:ART.phone,cap:"11:47 PM.",say:[[FRIEND,"You're actually doing it, "+(PROFILE.name||"aren't you")+"?! Then do it PROPERLY. Cash runs out fast — resolve runs out faster. See you on the floor. 🔧"]]},
+    {n:"06",art:ART.spark,cap:"Every forge starts cold. Yours lights tomorrow.",
      goto:{label:"START THE GAME",start:true}}
   ]}
 ];}
